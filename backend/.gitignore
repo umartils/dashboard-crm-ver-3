@@ -1,0 +1,19 @@
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/.env
+
+# Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/*.egg-info/
+
+# Environment files with real secrets — never commit these
+**/.env
+!**/.env.example
+
+# OS/editor
+.DS_Store
+*.pyc

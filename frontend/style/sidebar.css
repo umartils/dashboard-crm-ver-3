@@ -1,0 +1,265 @@
+/* =========================================================
+   4. SIDEBAR / NAVIGATION
+   ========================================================= */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  height: 100vh;
+  padding: 26px 18px;
+
+  background: var(--surface-muted);
+
+  color: #ffffff;
+}
+
+.brand {
+  margin-bottom: 34px;
+
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.nav {
+  flex: 1;
+}
+
+
+/* Main navigation item */
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  margin: 5px 0;
+  padding: 11px 13px;
+
+  border-radius: 10px;
+
+  color: #dbe8e1;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+
+/* Icon */
+.nav a svg {
+  flex-shrink: 0;
+
+  width: 18px;
+  height: 18px;
+
+  color: #a9beb4;
+
+  transition: color 0.15s ease;
+}
+
+
+/* Hover */
+.nav a:hover {
+  background: #1b3c30;
+  color: #ffffff;
+}
+
+.nav a:hover svg {
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   ADMIN NAVIGATION
+   ========================================================= */
+
+.nav-admin {
+  margin-top: 20px;
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* Administration label */
+.nav-group-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 8px;
+  padding: 0 13px;
+
+  color: #78978a;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-group-title svg {
+  flex-shrink: 0;
+
+  width: 14px;
+  height: 14px;
+}
+
+
+/* =========================================================
+   ADMIN SUBMENU
+   ========================================================= */
+
+.nav-submenu {
+  position: relative;
+}
+
+
+/* Vertical indicator */
+.nav-submenu::before {
+  content: "";
+
+  position: absolute;
+
+  top: 6px;
+  bottom: 6px;
+  left: 21px;
+
+  width: 1px;
+
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* Child item */
+.nav .nav-subitem {
+  position: relative;
+
+  margin-left: 8px;
+  padding-left: 31px;
+
+  color: #b8cbc1;
+
+  font-size: 13px;
+}
+
+
+/* Child hover */
+.nav .nav-subitem:hover {
+  background: rgba(255, 255, 255, 0.07);
+
+  color: #ffffff;
+}
+
+.nav .nav-subitem:hover svg {
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.user-profile-avatar {
+  flex-shrink: 0;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.user-profile-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--green);
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.user-profile-meta {
+  min-width: 0;
+}
+
+.user-profile-name,
+.user-profile-email {
+  margin-top: 1px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.user-profile-name {
+  margin-bottom: 1px;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.user-profile-email {
+  color: #a9beb4;
+
+  font-size: 11px;
+}
+
+.logout-btn {
+  width: 100%;
+
+  padding: 9px 12px;
+
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2c9c9;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: rgba(214, 69, 69, 0.25);
+  color: #ffffff;
+}

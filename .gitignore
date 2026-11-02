@@ -1,0 +1,42 @@
+# ===== Secrets =====
+.env
+.env.*
+!.env.example
+
+# ===== Node / Next.js =====
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== Python / FastAPI =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ===== Dump & backup database (berisi data donatur) =====
+*.sql.gz
+*.dump
+dump*.sql
+*_dump.sql
+backup/
+backups/
+dumps/
+
+# ===== Log =====
+*.log
+
+# ===== OS / editor =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

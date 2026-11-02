@@ -1,0 +1,13 @@
+fastapi[standard]>=0.116,<0.117
+sqlalchemy>=2.0,<2.1
+pymysql>=1.1,<1.2
+pandas>=2.2,<2.4
+numpy>=2.0,<3.0
+pydantic-settings>=2.6,<3.0
+apscheduler>=3.10,<4.0
+python-dotenv>=1.0,<2.0
+uvicorn
+cryptography>=43.0.0
+openpyxl>=3.1,<4.0
+python-multipart>=0.0.9
+python-dateutil

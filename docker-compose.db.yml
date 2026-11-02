@@ -1,0 +1,44 @@
+# Compose khusus database. Jalankan lebih dulu:
+#   docker compose -f docker-compose.db.yml up -d
+name: rfm-db
+
+services:
+  dashboard-db-new:
+    image: mysql:8.4
+    container_name: rfm-dashboard-db-new
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    # Hanya bisa diakses dari VPS itu sendiri (mis. lewat SSH tunnel).
+    # Jangan ubah ke "3308:3306" karena Docker akan menembus UFW.
+    ports:
+      - "127.0.0.1:3308:3306"
+
+    volumes:
+      - dashboard_data:/var/lib/mysql
+
+    networks:
+      - dashboard_net
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  dashboard_data:
+    name: rfm_dashboard_data
+
+networks:
+  dashboard_net:
+    external: true

@@ -1,0 +1,1 @@
+export default function Loading(){return <><div className="skeleton" style={{width:300,height:36,marginBottom:24}}/><div className="detail-grid">{Array.from({length:9}).map((_,i)=><div className="card" key={i}><div className="skeleton"/><div className="skeleton" style={{height:28,marginTop:12}}/></div>)}</div></>}
