@@ -520,7 +520,7 @@ select:focus {
   gap: 16px;
 }
 
-.card, .summary-card, .retention-chart-card,
+.card, .summary-card, .retention-chart-card, .wablast-summary-card,
 .chart-card {
   display: flex;
   flex-direction: column;
@@ -535,6 +535,9 @@ select:focus {
   padding: 18px 20px 30px;
 }
 .summary-card {
+  padding: 18px 20px 23px;
+}
+.wablast-summary-card {
   padding: 18px 20px 23px;
 }
 
@@ -2580,6 +2583,7 @@ select:focus {
   background-color: var(--card);
 }
 
+.wablast-summary-card.hightlight,
 .summary-card.highlight {
   background-color: #f1e4d8;
   border-color: #c0552e;
@@ -2722,7 +2726,7 @@ select:focus {
   cursor: grabbing;
 }
  
-.summary-slider .summary-card {
+.summary-slider .wablast-summary-card  {
   flex: 0 0 auto;
   min-width: 200px;
 }
@@ -2997,7 +3001,7 @@ select:focus {
     cursor: auto;
   }
 
-  .summary-slider .summary-card {
+  .summary-slider .wablast-summary-card {
     min-width: 160px;
   }
 }
