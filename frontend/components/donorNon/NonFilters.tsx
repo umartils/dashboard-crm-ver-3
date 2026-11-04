@@ -47,6 +47,6 @@ export default function DonorNonFilters( { querySearch, start_date, end_date, is
                     }
                 `} />
             </div>
-        </div>
+        </div> 
     )
 }

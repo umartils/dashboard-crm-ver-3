@@ -198,17 +198,19 @@ def blast_conversions(
         "page_size": page_size,
         "total": total,
         "total_pages": total_pages,
-    }
+    } 
 
 @router.get("/blast-conversions/export")
 def blast_conversions_export(
-    month: date | None = Query(default=None),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
     donated: str | None = None,
     search: str | None = None,
     db: Session = Depends(get_dashboard_db),
 ):
     clause, params = build_conversion_filters(
-        month=month,
+        start_date=start_date,
+        end_date=end_date,
         donated=donated,
         search=search,
     )

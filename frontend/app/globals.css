@@ -2561,6 +2561,7 @@ select:focus {
 
 .summary-card {
   display: flex;
+  text-align: center;
   flex-direction: column;
   gap: 6px;
   padding: 16px;

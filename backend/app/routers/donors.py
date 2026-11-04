@@ -209,10 +209,6 @@ def donor_summary_list(
     if page_size not in allowed_page_sizes:
         page_size = 5
 
-    # sort_by = sort_by if sort_by in SORTABLE_COLUMNS else "tgl_terakhir"
-    # sort_order = "asc" if sort_order.lower() == "asc" else "desc"
-    # column = SORTABLE_COLUMNS[sort_by]
-
     clause, params = filterSearch(
         search=search,
         is_valid=is_valid,

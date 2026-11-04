@@ -11,12 +11,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const backendUrl =
-    process.env.BACKEND_URL || "http://backend:8000";
-
-  const target = new URL(
-    `${backendUrl}/api/donors/export`
-  );
+  const backendUrl = process.env.BACKEND_URL || "http://backend:8000";
+  const target = new URL( `${backendUrl}/api/donors/export` );
 
   req.nextUrl.searchParams.forEach((value, key) => {
     target.searchParams.append(key, value);
