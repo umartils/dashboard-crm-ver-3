@@ -46,6 +46,7 @@ def build_segment_history_filters(
                     d.nama LIKE :search
                     OR d.hp LIKE :search
                     OR d.email LIKE :search
+                    OR id_donor LIKE :search
                 )
                 """
             )
@@ -143,6 +144,7 @@ def build_donor_filters(
                     nama LIKE :search
                     OR hp LIKE :search
                     OR email LIKE :search
+                    OR id_donor LIKE :search
                 )
                 """
             )
@@ -272,6 +274,8 @@ def build_donor_summary_filters(
                 (
                     nama LIKE :search
                     OR no_telp LIKE :search
+                    OR email LIKE :search
+                    OR id_donor LIKE :search
                 )
                 """
             )
@@ -324,6 +328,7 @@ def filterSearch(
                     nama LIKE :search
                     OR hp LIKE :search
                     OR email LIKE :search
+                    OR id_donor LIKE :search
                 )
                 """
             )

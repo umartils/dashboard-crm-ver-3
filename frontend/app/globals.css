@@ -2561,6 +2561,16 @@ select:focus {
 
 .summary-card {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #e2ddd0;
+  border-radius: 12px;
+  background-color: var(--card);
+}
+
+.wablast-summary-card {
+  display: flex;
   text-align: center;
   flex-direction: column;
   gap: 6px;

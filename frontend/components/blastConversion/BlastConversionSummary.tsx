@@ -70,7 +70,7 @@ export default function BlastConversionSummary({
         onMouseLeave={endDrag}
       >
         {cards.map((c) => (
-          <div className="summary-card" key={c.label}>
+          <div className="wablast-summary-card" key={c.label}>
             <span className="summary-label">{c.label}</span>
             <span className="summary-value">{c.value}</span>
           </div>
