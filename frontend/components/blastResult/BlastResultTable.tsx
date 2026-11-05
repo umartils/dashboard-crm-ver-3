@@ -17,12 +17,6 @@ export default function BlastResultTable({
   page: number;
   pageSize: number;
 }) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  const { goToPage, changePageSize } = usePagination({
-    totalPages,
-    mode: "url",
-  });
 
   return (
     <>

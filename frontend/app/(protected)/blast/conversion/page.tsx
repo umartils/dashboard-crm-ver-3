@@ -81,14 +81,12 @@ export default async function BlastConversionPage({
         }}
       />
 
-      <div className="table-card">
-        <BlastConversionTable
-          rows={list.data}
-          total={list.total}
-          page={currentPage}
-          pageSize={pageSize}
-        />
-      </div>
+      <BlastConversionTable
+        rows={list.data}
+        total={list.total}
+        page={currentPage}
+        pageSize={pageSize}
+      />
     </>
   );
 }

@@ -159,3 +159,16 @@ export type BlastResultRow = {
   created_at?: string;
   tgl_prospek?: string;
 };
+
+export type BlastConversionRow = {
+  id: number;
+  id_donor?: string;
+  nama_donor?: string;
+  phone_clean?: string;
+  blast_month?: string;
+  first_blast_date?: string;
+  blast_count?: number;
+  donated?: boolean;
+  donation_count?: number;
+  donation_amount?: number;
+};
