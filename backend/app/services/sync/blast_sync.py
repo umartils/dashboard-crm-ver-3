@@ -70,7 +70,7 @@ def _get_transactions_for_donors(donor_ids: list[str]) -> pd.DataFrame:
     """
     if not donor_ids:
         return EMPTY_TRX.copy()
-
+ 
     frames = []
     with source_engine.connect() as conn:
         for i in range(0, len(donor_ids), ID_BATCH_SIZE):
@@ -106,25 +106,31 @@ def run_blast_conversion_sync() -> dict:
 
         if not trx.empty:
             trx["id_donor"] = trx["id_donor"].astype(str)
-            trx["tanggal_donasi"] = pd.to_datetime(trx["tanggal_donasi"])
-            trx["trx_month"] = trx["tanggal_donasi"].values.astype("datetime64[M]").astype(date)
+            # normalize() supaya jam diabaikan dan donasi di hari blast tetap masuk (>=)
+            trx["tanggal_donasi"] = pd.to_datetime(trx["tanggal_donasi"]).dt.normalize()
+
+            # Jendela per grup blast: dari first_blast_date sampai akhir bulan blast
+            window = blasted[["id_donor", "blast_month", "first_blast_date"]].copy()
+            window["window_start"] = pd.to_datetime(window["first_blast_date"])
+            window["window_end"] = pd.to_datetime(window["blast_month"]) + pd.offsets.MonthEnd(0)
+
+            joined = window.merge(trx, on="id_donor", how="inner")
+            joined = joined[
+                (joined["tanggal_donasi"] >= joined["window_start"])
+                & (joined["tanggal_donasi"] <= joined["window_end"])
+            ]
 
             agg = (
-                trx.groupby(["id_donor", "trx_month"])
+                joined.groupby(["id_donor", "blast_month"])
                 .agg(donation_count=("nominal", "count"), donation_amount=("nominal", "sum"))
                 .reset_index()
             )
         else:
             agg = pd.DataFrame(
-                columns=["id_donor", "trx_month", "donation_count", "donation_amount"]
+                columns=["id_donor", "blast_month", "donation_count", "donation_amount"]
             )
 
-        merged = blasted.merge(
-            agg,
-            left_on=["id_donor", "blast_month"],
-            right_on=["id_donor", "trx_month"],
-            how="left",
-        )
+        merged = blasted.merge(agg, on=["id_donor", "blast_month"], how="left")
         merged["donation_count"] = merged["donation_count"].fillna(0).astype(int)
         merged["donation_amount"] = merged["donation_amount"].fillna(0)
         merged["donated"] = merged["donation_count"] > 0
