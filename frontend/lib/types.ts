@@ -40,7 +40,7 @@ export type Summary = {
   active_donors: number;
   new_donors: number;
   valid_donors: number;
-  total_transactions: number; // rename dari today_transactions
+  total_transactions: number;
   platinum: number;
   favorite_program: string | null;
   segment_distribution: { name: string; value: number }[];
