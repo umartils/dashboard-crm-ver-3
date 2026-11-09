@@ -13,6 +13,8 @@ import logging
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from app.core.timeutil import now_wib
+
 import pandas as pd
 from sqlalchemy import text
 
@@ -27,9 +29,9 @@ log = logging.getLogger(__name__)
 WIB = ZoneInfo("Asia/Jakarta")
 
 
-def now_wib() -> datetime:
-    """Waktu Jakarta (naive), tidak tergantung timezone server."""
-    return datetime.now(WIB).replace(tzinfo=None)
+# def now_wib() -> datetime:
+#     """Waktu Jakarta (naive), tidak tergantung timezone server."""
+#     return datetime.now(WIB).replace(tzinfo=None)
 
 
 # --------------------------------------------------------------------------- #

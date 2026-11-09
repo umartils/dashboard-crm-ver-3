@@ -12,6 +12,7 @@ from app.db.base import Base
 from app.db.session import dashboard_engine, DashboardSessionLocal
 from app.api.routes import router
 from app.services.sync.rfm_sync import run_rfm_sync
+from app.services.sync.donor_sync import run_donor_summary_sync
 from app.services.sync.sync_common import SyncAlreadyRunning
 from app.models.user import CrmUser
 import app.models.donor  # noqa
@@ -57,6 +58,18 @@ def _scheduled_rfm_sync():
     except SyncAlreadyRunning as exc:
         log.warning("Jadwal RFM dilewati: %s", exc)
 
+def _scheduled_donor_summary_sync():
+    try:
+        run_donor_summary_sync()
+    except SyncAlreadyRunning as exc:
+        log.warning("Jadwal donor summary dilewati: %s", exc)
+    except Exception:
+        log.exception("Jadwal donor summary gagal")
+
+def _scheduled_full_sync():
+    """Jalankan berurutan: RFM dulu, lalu donor summary."""
+    _scheduled_rfm_sync()
+    _scheduled_donor_summary_sync()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -65,11 +78,12 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=dashboard_engine)
         _seed_bootstrap_admin()
         scheduler.add_job(
-            _scheduled_rfm_sync,
+            # _scheduled_rfm_sync,
+            _scheduled_full_sync,
             "cron",
             hour=settings.rfm_cron_hour,
             minute=settings.rfm_cron_minute,
-            id="rfm_sync",
+            id="full_sync",
             replace_existing=True,
         )
         scheduler.start()

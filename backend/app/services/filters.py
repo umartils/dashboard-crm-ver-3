@@ -155,8 +155,10 @@ def build_donor_filters(
 def build_blast_result_filters(
     status: list[str],
     search: str | None,
-    start_date: date | None,
-    end_date: date | None,
+    import_start_date: date | None,
+    import_end_date: date | None,
+    blast_start_date: date | None,
+    blast_end_date: date | None,
     import_log_id: int | None,
 ):
     where = ["1=1"]
@@ -174,13 +176,21 @@ def build_blast_result_filters(
         where.append("import_log_id = :import_log_id")
         params["import_log_id"] = import_log_id
  
-    if start_date:
-        where.append("DATE(tgl_prospek) >= :start_date")
-        params["start_date"] = start_date
+    if import_start_date:
+        where.append("DATE(created_at) >= :import_start_date")
+        params["import_start_date"] = import_start_date
  
-    if end_date:
-        where.append("DATE(tgl_prospek) <= :end_date")
-        params["end_date"] = end_date
+    if import_end_date:
+        where.append("DATE(created_at) <= :import_end_date")
+        params["import_end_date"] = import_end_date
+ 
+    if blast_start_date:
+        where.append("DATE(tgl_prospek) >= :blast_start_date")
+        params["blast_start_date"] = blast_start_date
+ 
+    if blast_end_date:
+        where.append("DATE(tgl_prospek) <= :blast_end_date")
+        params["blast_end_date"] = blast_end_date
  
     if search:
         search = search.strip()

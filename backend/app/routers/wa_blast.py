@@ -3,7 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from app.services.export import export_conversion_xlsx
-from fastapi import APIRouter, Depends, Query, HTTPException, Header, Response, UploadFile, File
+from fastapi import APIRouter, Depends, Query, HTTPException, Response, UploadFile, File
 from datetime import date, datetime
  
 from pydantic import BaseModel, Field
@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.services.filters import build_conversion_filters, build_blast_result_filters
 from app.services.sync.blast_sync import run_blast_conversion_sync
-from app.core.security import require_internal_key, require_admin
+from app.core.security import require_internal_key
 
 from app.db.session import get_dashboard_db
 
@@ -381,8 +381,10 @@ def whatsapp_blast_results(
     page_size: int = Query(5, ge=1),
     status: list[str] = Query(default=[]),
     search: str | None = None,
-    start_date: date | None = Query(default=None),
-    end_date: date | None = Query(default=None),
+    import_start_date: date | None = Query(default=None),
+    import_end_date: date | None = Query(default=None),
+    blast_start_date: date | None = Query(default=None),
+    blast_end_date: date | None = Query(default=None),
     import_log_id: int | None = None,
     sort_by: str = "created_at",
     sort_order: str = "desc",
@@ -395,8 +397,10 @@ def whatsapp_blast_results(
     clause, params = build_blast_result_filters(
         status=status,
         search=search,
-        start_date=start_date,
-        end_date=end_date,
+        import_start_date=import_start_date,
+        import_end_date=import_end_date,
+        blast_start_date=blast_start_date,
+        blast_end_date=blast_end_date,
         import_log_id=import_log_id,
     )
  
