@@ -14,7 +14,7 @@ export async function getErrorMessage(res: Response): Promise<string> {
     }
   } catch {
     // body bukan JSON (mis. HTML dari proxy), tampilkan apa adanya jika pendek
-    return raw.length < 200 ? raw : fallback;
-  }
+    return raw.length < 100 ? raw : fallback;
+  } 
   return fallback;
 }

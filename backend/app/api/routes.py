@@ -1,3 +1,4 @@
+from app.services.sync.sync_common import is_sync_running
 from fastapi import APIRouter, Depends, Query, HTTPException, Header, Response, UploadFile, File
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -114,4 +115,25 @@ def authorize_user(
         "email": user["email"],
     }
 
+@router.get("/admin/sync/status")
+def sync_status(db: Session = Depends(get_dashboard_db)):
+    run = db.execute(
+        text("""
+            SELECT
+                id,
+                status,
+                message
+            FROM sync_run
+            ORDER BY started_at DESC
+            LIMIT 1
+        """)
+    ).mappings().first()
+    return {
+        "running": is_sync_running(),
+        "last_run": None if not run else {
+            "id": run.id,
+            "status": run.status,   # running | success | failed
+            "message": run.message,
+        },
+    }
     

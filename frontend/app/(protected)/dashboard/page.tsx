@@ -1,6 +1,8 @@
 // /@/app/dashboard/page.tsx
 
 import { serverApi } from "@/lib/server-api";
+import ConnectionError from "@/components/ui/ConnectionError";
+import { safeServerApi } from "@/lib/safe-api";
 import { rupiah } from "@/lib/api";
 import { SegmentChart, ProgramChart, DonorTypeChart, TopDonorsChart } from "@/components/dashboard/Charts";
 import { UserCheck, UserPlus, ShieldCheck, Wallet } from "lucide-react";
@@ -13,8 +15,6 @@ function todayISO() {
 }
 
 type DashboardPageProps = {
-  // Next.js 15+: searchParams berupa Promise.
-  // Kalau versi Next.js kamu lebih lama, ganti jadi objek biasa (tanpa Promise/await).
   searchParams: Promise<{ start_date?: string; end_date?: string }>;
 };
 
@@ -25,10 +25,25 @@ export default async function Dashboard({ searchParams }: DashboardPageProps) {
   const startDate = params.start_date || today;
   const endDate = params.end_date || today;
 
-  const [summary, donorType] = await Promise.all([
-    serverApi<Summary>(`/api/dashboard/summary?start_date=${startDate}&end_date=${endDate}`),
-    serverApi<DonorTypeBreakdown>(`/api/analytics/donor-type?year=2026&start_date=${startDate}&end_date=${endDate}`),
+  const [summaryRes, donorTypeRes] = await Promise.all([
+    safeServerApi<Summary>(`/api/dashboard/summary?start_date=${startDate}&end_date=${endDate}`),
+    safeServerApi<DonorTypeBreakdown>(`/api/analytics/donor-type?year=2026&start_date=${startDate}&end_date=${endDate}`),
   ]);
+
+  if (!summaryRes.ok || !donorTypeRes.ok) {
+    const err = !summaryRes.ok ? summaryRes : (donorTypeRes as Extract<typeof donorTypeRes, { ok: false }>);
+    return (
+      <>
+        <div className="topbar">
+          <h1>Dashboard CRM Donatur</h1>
+        </div>
+        <ConnectionError kind={err.kind} message={err.message} />
+      </>
+    );
+  }
+
+  const summary = summaryRes.data;
+  const donorType = donorTypeRes.data;
 
   return (
     <FilterLoadingProvider>

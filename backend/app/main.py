@@ -6,6 +6,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
 from app.core.config import get_settings
 from app.db.base import Base
@@ -57,28 +59,50 @@ def _scheduled_rfm_sync():
         run_rfm_sync()
     except SyncAlreadyRunning as exc:
         log.warning("Jadwal RFM dilewati: %s", exc)
+    except OperationalError as exc:
+        log.error("Jadwal RFM gagal, database tidak terhubung: %s", exc.orig)
+    except Exception:
+        log.exception("Jadwal RFM gagal")
+
 
 def _scheduled_donor_summary_sync():
     try:
         run_donor_summary_sync()
     except SyncAlreadyRunning as exc:
         log.warning("Jadwal donor summary dilewati: %s", exc)
+    except OperationalError as exc:
+        log.error("Jadwal donor summary gagal, database tidak terhubung: %s", exc.orig)
     except Exception:
         log.exception("Jadwal donor summary gagal")
+
 
 def _scheduled_full_sync():
     """Jalankan berurutan: RFM dulu, lalu donor summary."""
     _scheduled_rfm_sync()
     _scheduled_donor_summary_sync()
 
+
+def _init_database() -> None:
+    """Buat tabel dan seed admin. Gagal di sini tidak boleh mematikan aplikasi."""
+    try:
+        Base.metadata.create_all(bind=dashboard_engine)
+        _seed_bootstrap_admin()
+    except OperationalError as exc:
+        log.error(
+            "Inisialisasi DB dilewati, database tidak terhubung: %s. "
+            "Tabel/seed akan dicoba lagi saat container restart.",
+            exc.orig,
+        )
+    except Exception:
+        log.exception("Inisialisasi DB gagal")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     is_leader = _acquire_leadership()
     if is_leader:
-        Base.metadata.create_all(bind=dashboard_engine)
-        _seed_bootstrap_admin()
+        _init_database()
         scheduler.add_job(
-            # _scheduled_rfm_sync,
             _scheduled_full_sync,
             "cron",
             hour=settings.rfm_cron_hour,
@@ -115,6 +139,20 @@ async def sync_running_handler(request: Request, exc: SyncAlreadyRunning):
     )
 
 
+@app.exception_handler(OperationalError)
+async def db_unavailable_handler(request: Request, exc: OperationalError):
+    # Detail asli (host, kode error) hanya ke log, jangan dikirim ke client.
+    log.error("DB unavailable on %s: %s", request.url.path, exc.orig)
+    return JSONResponse(
+        status_code=503,
+        content={
+            "code": "DB_UNAVAILABLE",
+            "detail": "Tidak dapat terhubung dengan database zains. Coba lagi beberapa saat.",
+        },
+        headers={"Retry-After": "5"},
+    )
+
+
 app.include_router(router)
 app.include_router(wa_blast.router)
 app.include_router(users.router)
@@ -126,3 +164,11 @@ app.include_router(retention.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/health/db")
+def health_db():
+    """Cek koneksi DB. Kalau gagal, OperationalError ditangani handler 503 di atas."""
+    with dashboard_engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    return {"status": "ok", "db": "up"}
