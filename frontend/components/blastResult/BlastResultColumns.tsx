@@ -16,7 +16,11 @@
      key: "status_blast", label: "Status Blast", locked: true,
      render: (r) => (
        <span className="segment-badge" data-blast={r.status_blast || ""}>
-         {r.status_blast || "-"}
+         {
+          r.status_blast == 'read' ? 'Read' 
+          : r.status_blast == 'delivered' ? 'Delivered' 
+          : r.status_blast == 'failed' ? 'Failed' : '-'
+         }
        </span>
      ),
    },

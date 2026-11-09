@@ -9,8 +9,11 @@ type Params = {
 
   status?: string | string[];
 
-  start_date?: string;
-  end_date?: string;
+  import_start_date?: string;
+  import_end_date?: string;
+
+  blast_start_date?: string;
+  blast_end_date?: string;
 
   search?: string;
 };
@@ -61,8 +64,10 @@ export default async function WhatsappBlastPage({
         current={{
           search: p.search || "",
           status: toArray(p.status),
-          start_date: p.start_date || "",
-          end_date: p.end_date || "",
+          import_start_date: p.import_start_date || "",
+          import_end_date: p.import_end_date || "",
+          blast_start_date: p.blast_start_date || "",
+          blast_end_date: p.blast_end_date || "",
         }}
       />
 
