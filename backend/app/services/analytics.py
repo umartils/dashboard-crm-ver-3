@@ -72,6 +72,14 @@ def get_donor_type_breakdown(
             """),
             params,
         ).mappings().one()
+        new_count = conn.execute(
+                text("""
+                    SELECT COUNT(DISTINCT id_donatur)
+                    FROM corez_donatur
+                    WHERE tgl_reg >= :start AND tgl_reg < :end_excl
+                """),
+                params,
+            ).scalar() or 0
 
     # new_count = retained_count = reactivated_count = 0
     # for row in rows:
@@ -82,7 +90,8 @@ def get_donor_type_breakdown(
     #     else:
     #         new_count += 1
     
-    new_count = int(row["new_cnt"])
+    # new_count = int(row["new_cnt"])
+    
     retained_count = int(row["retained"])
     reactivated_count = int(row["reactivated"])
 
@@ -131,22 +140,30 @@ def get_dashboard_summary(db: Session, start_date: date | None = None, end_date:
             """),
             date_params,
         ).scalar() or 0
+        # new_donors = conn.execute(
+        #     text("""
+        #         SELECT COUNT(DISTINCT t.id_donatur)
+        #         FROM corez_transaksi t
+        #         WHERE t.transaksi > 0
+        #         AND t.approved_transaksi = 'y'
+        #         AND t.tgl_transaksi >= :start
+        #         AND t.tgl_transaksi <  :end
+        #         AND NOT EXISTS (
+        #             SELECT 1
+        #             FROM corez_transaksi p
+        #             WHERE p.id_donatur = t.id_donatur
+        #                 AND p.transaksi > 0
+        #                 AND p.approved_transaksi = 'y'
+        #                 AND p.tgl_transaksi < :start
+        #         )
+        #     """),
+        #     date_params,
+        # ).scalar() or 0
         new_donors = conn.execute(
             text("""
-                SELECT COUNT(DISTINCT t.id_donatur)
-                FROM corez_transaksi t
-                WHERE t.transaksi > 0
-                AND t.approved_transaksi = 'y'
-                AND t.tgl_transaksi >= :start
-                AND t.tgl_transaksi <  :end
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM corez_transaksi p
-                    WHERE p.id_donatur = t.id_donatur
-                        AND p.transaksi > 0
-                        AND p.approved_transaksi = 'y'
-                        AND p.tgl_transaksi < :start
-                )
+                SELECT COUNT(DISTINCT id_donatur)
+                FROM corez_donatur
+                WHERE tgl_reg >= :start AND tgl_reg < :end
             """),
             date_params,
         ).scalar() or 0
@@ -158,7 +175,7 @@ def get_dashboard_summary(db: Session, start_date: date | None = None, end_date:
                 AND transaksi > 0
                 AND approved_transaksi = 'y'
             """),
-            date_params,
+            date_params, 
         ).scalar() or 0
         
         top_donors = conn.execute(

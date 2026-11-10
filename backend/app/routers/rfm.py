@@ -175,7 +175,27 @@ def donors_export(
         ),
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )    
+
+@router.patch("/donors/{donor_id}")
+def update_donor(
+    donor_id: int,
+    is_valid: int,
+    db: Session = Depends(get_dashboard_db),
+):
+    result = db.execute(
+        text("""
+            UPDATE donor_summary
+            SET is_valid = :is_valid
+            WHERE id_donor = :donor_id
+        """),
+        {"is_valid": is_valid, "donor_id": donor_id}
+    )
+    db.commit()
     
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Donor not found")
+    
+    return {"message": "Donor updated successfully"}
 
 @router.get("/donors/{donor_id}")
 def donor_detail(
