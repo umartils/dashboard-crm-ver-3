@@ -61,7 +61,7 @@ QUERY_PAYMENT = "SELECT coa AS id_payment, nama_coa AS jenis_payment FROM fins_c
 # is_valid TIDAK di-UPDATE: nilainya hanya boleh diubah lewat hasil import
 # WhatsApp blast, bukan tertimpa ulang oleh format-check tiap sync. Saat donor
 # baru pertama kali di-INSERT, is_valid tetap terisi dari format-check awal.
-NO_UPDATE_COLS = ("id_donor", "is_valid")
+NO_UPDATE_COLS = ("id_donor", "is_valid", "hp")
 
 
 def _detect_segment_changes(df: pd.DataFrame) -> pd.DataFrame:

@@ -1,14 +1,14 @@
 // app/admin/users/userColumns.tsx
 import type { DataTableColumn } from "@/components/ui/types";
 import type { CRMUser } from "@/lib/types";
-import { Pencil, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 
 interface Handlers {
   onEdit: (user: CRMUser) => void;
   onDelete: (user: CRMUser) => void;
 }
 
- 
+  
 export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUser>[]{
   return [
     {
@@ -39,10 +39,10 @@ export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUs
       align: "center",
       render: (u) => (
         <div className="row-actions">
-          <button type="button" className="icon-button" aria-label={`Edit ${u.email}`} title="Edit" onClick={() => onEdit(u)}>
-            <Pencil size={16} />
+          <button type="button" className="icon-button-edit" aria-label={`Edit ${u.email}`} title="Edit" onClick={() => onEdit(u)}>
+            <SquarePen size={16} />
           </button>
-          <button type="button" className="icon-button" aria-label={`Hapus ${u.email}`} title="Hapus" onClick={() => onDelete(u)}>
+          <button type="button" className="icon-button-delete" aria-label={`Hapus ${u.email}`} title="Hapus" onClick={() => onDelete(u)}>
             <Trash2 size={16} />
           </button>
         </div>

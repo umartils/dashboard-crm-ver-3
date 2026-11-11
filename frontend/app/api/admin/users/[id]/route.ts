@@ -29,7 +29,7 @@ export async function PATCH(request: Request, { params }: Context) {
   const id = parseId((await params).id);
   if (id === null) {
     return NextResponse.json({ detail: "ID user tidak valid" }, { status: 400 });
-  }
+  } 
 
   const body = await request.json().catch(() => ({}));
   const email = String(body.email || "").trim().toLowerCase();

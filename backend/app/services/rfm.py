@@ -207,7 +207,7 @@ def segment_label(row):
     #     return "Platinum"
     # if row['jenis_donor'] not in ('Retail', 'Retail (Pak Danar)'):
     #     return "Other"
-    if r <= 60 and f == 1 and m_s <= 2:
+    if f <= 2:
         return "New Donor"
     if m_s == 5 and r <= 90:
         return "Champion"

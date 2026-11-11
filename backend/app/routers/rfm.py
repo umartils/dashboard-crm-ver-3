@@ -11,6 +11,7 @@ from app.services.filters import build_segment_history_filters, build_donor_filt
 from app.services.export import export_rfm_xlsx, export_donor_history_xlsx
 import math
 from app.services.rfm import get_campaign
+from pydantic import BaseModel
 
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_internal_key)])
@@ -42,6 +43,10 @@ SEGMENT_RANK = {
     "Potential": 2,
     "Passive": 1,
 }
+
+class DonorUpdate(BaseModel):
+    hp: str | None
+    is_valid: bool
 
 @router.get("/donors")
 def donors(
@@ -179,24 +184,31 @@ def donors_export(
 @router.patch("/donors/{donor_id}")
 def update_donor(
     donor_id: int,
-    is_valid: int,
+    payload: DonorUpdate,
     db: Session = Depends(get_dashboard_db),
 ):
     result = db.execute(
         text("""
             UPDATE donor_summary
-            SET is_valid = :is_valid
+            SET is_valid = :is_valid, hp = :hp
             WHERE id_donor = :donor_id
         """),
-        {"is_valid": is_valid, "donor_id": donor_id}
+        {"is_valid": int(payload.is_valid), "hp": payload.hp, "donor_id": donor_id},
     )
     db.commit()
-    
-    if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Donor not found")
-    
-    return {"message": "Donor updated successfully"}
 
+    if result.rowcount == 0:
+        # MySQL mengembalikan rowcount 0 juga jika nilainya sama dengan sebelumnya.
+        # Untuk membedakannya, tambahkan SELECT dulu atau aktifkan FOUND_ROWS di engine.
+        raise HTTPException(status_code=404, detail="Donor tidak ditemukan")
+
+    return {
+        "message": "Donor updated successfully",
+        "id_donor": donor_id,
+        "is_valid": int(payload.is_valid),
+        "hp": payload.hp
+    }
+    
 @router.get("/donors/{donor_id}")
 def donor_detail(
     donor_id: int, 

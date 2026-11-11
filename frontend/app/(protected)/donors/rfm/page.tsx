@@ -89,7 +89,7 @@ export default async function Donors({ searchParams }: { searchParams: Promise<P
           last_donation_end: p.last_donation_end || "",
           prospect_exclude_start: p.prospect_exclude_start || "",
           prospect_exclude_end: p.prospect_exclude_end || "",
-        }}
+        }} 
       />
 
       {/* <div className="table-card"> */}
@@ -98,6 +98,7 @@ export default async function Donors({ searchParams }: { searchParams: Promise<P
         total={list.total}
         page={currentPage}
         pageSize={pageSize}
+        role={userRole}
       />
       {/* </div> */}
     </div>
