@@ -61,7 +61,7 @@ export default function BlastSettingsForm({
               id="blast-rate-input"
               type="number"
               min={0}
-              step="1"
+              step="any"
               value={rate}
               onChange={(e) => setRate(e.target.value)}
             />

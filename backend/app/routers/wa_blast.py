@@ -175,10 +175,10 @@ def blast_conversions(
     offset = (page - 1) * page_size
     query_params = {**params, "limit": page_size, "offset": offset}
  
-    rows = db.execute(
+    rows = db.execute( 
         text(
             f"""
-            SELECT id, id_donor, nama_donor, phone_clean, blast_month,
+            SELECT id, id_donor, nama_donor, phone_clean, DATE_FORMAT(blast_month, '%Y-%m') AS blast_month,
                    first_blast_date, blast_count, donated, donation_count,
                    donation_amount, updated_at
             FROM blast_conversions

@@ -1514,7 +1514,7 @@ select:focus {
 .modal-close {
   border: 0;
   background: transparent;
-  color: var(--brand-800);
+  color: var(--charcoal-muted);
   box-shadow: none;
   font-size: 28px;
   line-height: 1;
@@ -1960,14 +1960,42 @@ select:focus {
   gap: 12px;
 }
 
+.app-modal-header-wrapper {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.app-modal-header-close {
+  border: 0; 
+  background: transparent; 
+  color: var(--charcoal-muted, #6b7280); 
+  font-size: 20px; 
+  /* line-height: 1;  */
+  cursor: pointer;
+}
+
+.app-modal-header-close:hover {
+  background: var(--info-tint);
+  color: var(--info-dark);
+}
+
+.app-modal-header svg {
+  width: 20px; 
+  height: 20px; 
+  flex-shrink: 0; 
+  color: var(--charcoal-muted, #6b7280);
+}
+
 .app-modal-header {
   display: flex; 
   align-items: center; 
   justify-content: flex-start; 
   gap: 10px; 
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 12px;
 }
 
 .app-modal-header h3 {
@@ -1987,7 +2015,8 @@ select:focus {
 .app-modal-actions { 
   margin-top: 20px;
   display: flex; 
-  justify-content: flex-end; gap: 8px; margin-top: 4px; 
+  justify-content: flex-end; 
+  gap: 8px;
 }
 
 .modal-field-label {

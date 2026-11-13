@@ -46,9 +46,15 @@ export default function DonorEditModal({
   return (
     <div className="app-modal-backdrop" onClick={() => !saving && onClose()}>
       <div className="app-modal-card" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <div className="app-modal-header">
-          <SquarePen size={20} />
-          <h3>Edit Status Donor ({donor.nama})</h3>
+        <div className="app-modal-header-wrapper">
+          <div className="app-modal-header">
+            <SquarePen size={20} />
+            <h3>Edit Status Donor ({donor.nama})</h3>
+          </div>
+
+          <button type="button" className="app-modal-header-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="app-modal-form">

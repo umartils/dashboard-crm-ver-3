@@ -1,13 +1,16 @@
 // components/blastConversion/ConversionColumns.tsx
 import type { BlastConversionRow } from "@/lib/types";
 import type { DataTableColumn } from "@/components/ui/types";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatMonth } from "@/lib/format";
 import { rupiah } from "@/lib/api";
  
 export const BlastResultColumns: DataTableColumn<BlastConversionRow>[] = [
   { key: "nama_donor", label: "Nama Donatur", locked: true, sortable: true,},
   { key: "phone_clean", label: "No. HP", locked: true,},
-  { key: "blast_month", label: "Bulan Blast", locked: true},
+  // { key: "blast_month", label: "Bulan Blast", locked: true},
+  { key: "blast_month", label: "Bulan Blast", sortable: true, align: "center",
+    render: (r) => <center>{formatMonth(r.blast_month)}</center>
+  },
   { key: "first_blast_date", label: "Tanggal Blast Pertama", sortable: true, align: "center",
     render: (r) => <center>{formatDate(r.first_blast_date)}</center>
   },

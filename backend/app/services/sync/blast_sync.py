@@ -49,14 +49,14 @@ def _get_blasted_donor_groups() -> pd.DataFrame:
                     id_donor,
                     MAX(nama_donor) AS nama_donor,
                     MAX(phone_clean) AS phone_clean,
-                    DATE_FORMAT(tgl_prospek, '%Y-%m-01') AS blast_month,
+                    DATE_FORMAT(tgl_prospek, '%Y-%m') AS blast_month,
                     MIN(DATE(tgl_prospek)) AS first_blast_date,
                     COUNT(*) AS blast_count
                 FROM whatsapp_blast_results
                 WHERE is_matched = 1
                   AND status_blast IN ('delivered', 'read')
                   AND id_donor IS NOT NULL
-                GROUP BY id_donor, DATE_FORMAT(tgl_prospek, '%Y-%m-01')
+                GROUP BY id_donor, DATE_FORMAT(tgl_prospek, '%Y-%m')
                 """
             )
         ).mappings().all()
@@ -129,7 +129,7 @@ def run_blast_conversion_sync() -> dict:
             agg = pd.DataFrame(
                 columns=["id_donor", "blast_month", "donation_count", "donation_amount"]
             )
-
+ 
         merged = blasted.merge(agg, on=["id_donor", "blast_month"], how="left")
         merged["donation_count"] = merged["donation_count"].fillna(0).astype(int)
         merged["donation_amount"] = merged["donation_amount"].fillna(0)

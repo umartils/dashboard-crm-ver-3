@@ -8,3 +8,14 @@ export function formatDate(value?: string) {
     year: "numeric",
   });
 }
+
+export function formatMonth(value?: string) {
+  if (!value) return "-";
+  const [year, month] = value.split("-");
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April",
+    "Mei", "Juni", "Juli", "Agustus",
+    "September", "Oktober", "November", "Desember"
+  ];
+  return `${monthNames[Number(month) - 1]} ${year}`;
+}

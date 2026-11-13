@@ -28,7 +28,7 @@ export default async function BlastConversionPage({
   searchParams: Promise<Params>;
 }) {
   const p = await searchParams;
-  const monthValue = p.month ? `${p.month}-01` : undefined;
+  // const monthValue = p.month ? `${p.month}-01` : undefined;
 
   const query = new URLSearchParams();
 
@@ -57,6 +57,7 @@ export default async function BlastConversionPage({
 
   const currentPage = Number(p.page || 1);
   const pageSize = Number(p.page_size || list.page_size || 10);
+  console.log(list.data);
 
   return ( 
     <>
