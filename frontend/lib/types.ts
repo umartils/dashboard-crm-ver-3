@@ -35,6 +35,19 @@ export type MultiSelectFilterProps = {
   ) => void;
 };
 
+export interface SelectFilterProps {
+  label: string;
+  paramKey: string;
+  options: string[];
+  selected: string;
+  align?: "left" | "right";
+  onChange: (key: string, value: string) => void;
+  labelMap?: Record<string, string>;
+  allLabel?: string;
+  showAllOption?: boolean; // default true, set false untuk form
+  placeholder?: string;    // teks saat belum ada pilihan
+}
+
 export type Summary = {
   total_donors: number;
   active_donors: number;

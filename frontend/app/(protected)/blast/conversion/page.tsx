@@ -57,7 +57,7 @@ export default async function BlastConversionPage({
 
   const currentPage = Number(p.page || 1);
   const pageSize = Number(p.page_size || list.page_size || 10);
-  console.log(list.data);
+  // console.log(list.data);
 
   return ( 
     <>

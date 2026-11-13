@@ -58,11 +58,6 @@ export default function DonorEditModal({
         </div>
 
         <form onSubmit={handleSubmit} className="app-modal-form">
-          {/* <div className="form-field">
-            <span>Donor</span>
-            <strong>{donor.nama}</strong>
-          </div> */} 
-
           <label className="form-field">
             <span className="modal-field-label">No Telp</span>
             <input type="text" value={hp} onChange={(e) => setHp(e.target.value)} required disabled={saving} />

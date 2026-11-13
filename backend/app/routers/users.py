@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 class UserUpdate(BaseModel):
     email: str
     is_active: bool
+    role: str
 
 
 def _is_self(user: dict, x_user_email: str | None) -> bool:
@@ -86,8 +87,11 @@ def admin_updateUser(
 
     if existEmail(db, email, user_id):
         raise HTTPException(status_code=409, detail="Email sudah terdaftar")
+    
+    if payload.role not in ["admin", "user"]:
+        raise HTTPException(status_code=400, detail="Role tidak valid")
 
-    updateUser(db, user_id, email, payload.is_active)
+    updateUser(db, user_id, email, payload.is_active, role=payload.role)
     return {"data": UserResponse.model_validate(getUser(db, user_id)).model_dump()}
 
 

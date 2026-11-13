@@ -211,7 +211,7 @@ def segment_label(row):
         return "New Donor"
     if m_s == 5 and r <= 90:
         return "Champion"
-    if f_s == 4 and m_s == 4 and r <= 90:
+    if f_s == 4 and m_s == 4 and r <= 120:
         return "Loyal"
     if r <= 180:
         return "Active"

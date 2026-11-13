@@ -81,9 +81,9 @@ def getUser(db: Session, user_id: int):
     ).mappings().first()    
     return dict(row) if row else None
 
-def updateUser(db: Session, user_id: int, email: str, is_active: bool):
-    db.execute(text("UPDATE crm_users SET email = :email, is_active = :is_active WHERE id = :id"),
-               { "email": email, "id": user_id, "is_active": 1 if is_active else 0 } )
+def updateUser(db: Session, user_id: int, email: str, is_active: bool, role: str):
+    db.execute(text("UPDATE crm_users SET email = :email, is_active = :is_active, role = :role WHERE id = :id"),
+               { "email": email, "id": user_id, "is_active": 1 if is_active else 0, "role": role })
     db.commit()
 
 def deleteUser(db:Session, user_id: int):

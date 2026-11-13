@@ -9,6 +9,17 @@ export function formatDate(value?: string) {
   });
 }
 
+export function formatLongDate(value?: string) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export function formatMonth(value?: string) {
   if (!value) return "-";
   const [year, month] = value.split("-");

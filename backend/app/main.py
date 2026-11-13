@@ -15,6 +15,7 @@ from app.db.session import dashboard_engine, DashboardSessionLocal
 from app.api.routes import router
 from app.services.sync.rfm_sync import run_rfm_sync
 from app.services.sync.donor_sync import run_donor_summary_sync
+from app.services.sync.blast_sync import run_blast_conversion_sync
 from app.services.sync.sync_common import SyncAlreadyRunning
 from app.models.user import CrmUser
 import app.models.donor  # noqa
@@ -74,12 +75,23 @@ def _scheduled_donor_summary_sync():
         log.error("Jadwal donor summary gagal, database tidak terhubung: %s", exc.orig)
     except Exception:
         log.exception("Jadwal donor summary gagal")
+        
+def _scheduled_blast_conversion_sync():
+    try:
+        run_blast_conversion_sync()
+    except SyncAlreadyRunning as exc:
+        log.warning("Jadwal blast conversion dilewati: %s", exc)
+    except OperationalError as exc:
+        log.error("Jadwal blast conversion gagal, database tidak terhubung: %s", exc.orig)
+    except Exception:
+        log.exception("Jadwal blast conversion gagal")
 
 
 def _scheduled_full_sync():
     """Jalankan berurutan: RFM dulu, lalu donor summary."""
     _scheduled_rfm_sync()
     _scheduled_donor_summary_sync()
+    _scheduled_blast_conversion_sync()
 
 
 def _init_database() -> None:

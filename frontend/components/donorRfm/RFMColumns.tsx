@@ -2,7 +2,7 @@
 import { rupiah } from "@/lib/api";
 import type { DonorRFM } from "@/lib/types";
 import type { DataTableColumn } from "@/components/ui/types";
-import { formatDate } from "@/lib/format"; 
+import { formatLongDate } from "@/lib/format"; 
 import { SquarePen } from "lucide-react";
 
 interface Handlers {
@@ -42,9 +42,9 @@ export function RFMColumns({onEdit, canEdit}: Handlers): DataTableColumn<DonorRF
     { key: "payment_favorit", label: "Payment Favorit" },
     { 
       key: "last_donation_date", label: "Terakhir Donasi", sortable: true, align: "center",
-      defaultVisible: true, render: (r) => formatDate(r.last_donation_date) 
+      defaultVisible: true, render: (r) => formatLongDate(r.last_donation_date) 
     },
-    { key: "jenis_donor", label: "Jenis Donor", locked: true, defaultVisible: true },
+    // { key: "jenis_donor", label: "Jenis Donor", locked: true, defaultVisible: true },
     {
       key: "is_valid", label: "Jenis Valid", locked: true, defaultVisible: true,
       render: (r) => {
@@ -59,7 +59,7 @@ export function RFMColumns({onEdit, canEdit}: Handlers): DataTableColumn<DonorRF
     { key: "program_category", label: "Kategori Program" },
     { 
       key: "tgl_prospek", label: "Tanggal Prospek", sortable: true, align: "center",
-      render: (r) => formatDate(r.tgl_prospek) },
+      render: (r) => formatLongDate(r.tgl_prospek) },
     {
       key: "actions",
       label: "Aksi",

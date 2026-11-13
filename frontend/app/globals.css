@@ -929,7 +929,7 @@ select:focus {
   top: calc(100% + 7px);
   left: 0;
   right: auto;
-  width: max-content;
+  width: auto;
   min-width: 220px;
   max-width: min(320px, calc(100vw - 24px));
   padding: 6px;
@@ -1965,7 +1965,7 @@ select:focus {
   align-items: center; 
   justify-content: space-between; 
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 12px;
 }
@@ -2010,8 +2010,9 @@ select:focus {
 .app-modal-form { 
   display: flex; 
   flex-direction: column; 
-  gap: 12px; 
+  gap: 15px; 
 }
+
 .app-modal-actions { 
   margin-top: 20px;
   display: flex; 
@@ -2019,10 +2020,19 @@ select:focus {
   gap: 8px;
 }
 
+.app-modal-input-field {
+  box-sizing: border-box;
+  height: 46px;
+  min-height: 46px;
+  border-radius: 10px;
+  /* margin-top: 10px; */
+}
+
 .modal-field-label {
   font-size: 14px; 
   font-weight: 600; 
-  margin-bottom: 6px;
+  margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 .form-field { 
