@@ -1,6 +1,6 @@
 // components/user/UserEditModal.tsx
 "use client";
- 
+
 import { FormEvent, useEffect, useState } from "react";
 import type { CRMUser } from "@/lib/types";
 import ToggleSwitch from "@/components/ui/ToggleSwitch";

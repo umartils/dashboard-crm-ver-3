@@ -150,6 +150,10 @@ export type CRMUser = {
   role: string;
   is_active: boolean;
   created_at: string;
+  created_by: string;
+  last_login_at: string | null;
+  updated_at: string | null;
+  updated_by: string | null;
 };
 
 export type DonorNon = {

@@ -44,7 +44,12 @@ export async function PATCH(request: Request, { params }: Context) {
       "X-Internal-Key": process.env.INTERNAL_API_KEY || "",
       "X-User-Email": guard.session!.user!.email || "",
     },
-    body: JSON.stringify({ email, is_active: Boolean(body.is_active), role: String(body.role || "") }),
+    body: JSON.stringify({ 
+      email, 
+      is_active: Boolean(body.is_active), 
+      role: String(body.role || ""),
+      updated_by: guard.session!.user!.email || "", 
+    }),
     cache: "no-store",
   });
 

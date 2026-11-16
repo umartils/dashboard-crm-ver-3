@@ -8,19 +8,15 @@ from app.db.session import get_dashboard_db, source_engine
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.services.users import list_users, create_user, getUser, updateUser, deleteUser, existEmail
-from app.schemas.common import UserCreateRequest, UserResponse
+from app.schemas.common import UserCreateRequest, UserResponse, UserUpdate
 
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+from app.core.timeutil import now_wib
+
 router = APIRouter(prefix="/api", dependencies=[Depends(require_internal_key)])
 logger = logging.getLogger(__name__)
-
-
-class UserUpdate(BaseModel):
-    email: str
-    is_active: bool
-    role: str
 
 
 def _is_self(user: dict, x_user_email: str | None) -> bool:
@@ -64,11 +60,11 @@ def admin_updateUser(
     x_user_email: str | None = Header(default=None),
 ):
     require_admin(db, x_user_email)
-
+ 
     email = payload.email.strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Email tidak valid")
-
+ 
     target = getUser(db, user_id)
     if not target:
         raise HTTPException(status_code=404, detail="User tidak ditemukan")
@@ -83,7 +79,15 @@ def admin_updateUser(
     if payload.role not in ["admin", "user"]:
         raise HTTPException(status_code=400, detail="Role tidak valid")
 
-    updateUser(db, user_id, email, payload.is_active, role=payload.role)
+    updateUser(
+        db, 
+        user_id, 
+        email, 
+        payload.is_active, 
+        role=payload.role, 
+        updated_by=payload.updated_by, 
+        updated_at=now_wib()
+    )
     return {"data": UserResponse.model_validate(getUser(db, user_id)).model_dump()}
 
 

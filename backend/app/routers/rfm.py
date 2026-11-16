@@ -12,6 +12,7 @@ from app.services.export import export_rfm_xlsx, export_donor_history_xlsx
 import math
 from app.services.rfm import get_campaign
 from pydantic import BaseModel
+from app.core.timeutil import now_wib
 
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_internal_key)])
@@ -42,11 +43,13 @@ SEGMENT_RANK = {
     "Active": 3,
     "Potential": 2,
     "Passive": 1,
-}
+} 
 
 class DonorUpdate(BaseModel):
     hp: str | None
     is_valid: bool
+    updated_by: str | None = None
+    updated_at: datetime | None = None
 
 @router.get("/donors")
 def donors(
@@ -190,10 +193,16 @@ def update_donor(
     result = db.execute(
         text("""
             UPDATE donor_summary
-            SET is_valid = :is_valid, hp = :hp
+            SET is_valid = :is_valid, hp = :hp, updated_by = :updated_by, updated_at = :updated_at
             WHERE id_donor = :donor_id
         """),
-        {"is_valid": int(payload.is_valid), "hp": payload.hp, "donor_id": donor_id},
+        {
+            "is_valid": int(payload.is_valid),
+            "hp": payload.hp,
+            "donor_id": donor_id,
+            "updated_by": payload.updated_by,
+            "updated_at": now_wib()
+        },
     )
     db.commit()
 
@@ -206,7 +215,9 @@ def update_donor(
         "message": "Donor updated successfully",
         "id_donor": donor_id,
         "is_valid": int(payload.is_valid),
-        "hp": payload.hp
+        "hp": payload.hp,
+        "updated_by": payload.updated_by,
+        "updated_at": now_wib().isoformat(),
     }
     
 @router.get("/donors/{donor_id}")

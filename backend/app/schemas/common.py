@@ -15,6 +15,15 @@ class UserResponse(BaseModel):
     email: str
     role: str
     is_active: bool
+    created_by: str | None = None
     created_at: datetime
+    last_login_at: datetime | None = None
 
     model_config = {"from_attributes": True}
+
+class UserUpdate(BaseModel):
+    email: str
+    is_active: bool
+    role: str
+    updated_by: str | None = None
+    updated_at: datetime | None = None

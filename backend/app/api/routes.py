@@ -1,4 +1,5 @@
 from app.services.sync.sync_common import is_sync_running
+from app.services.users import updateLoginInfo
 from fastapi import APIRouter, Depends, Query, HTTPException, Header, Response, UploadFile, File
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -108,6 +109,8 @@ def authorize_user(
             "allowed": False,
             "role": None,
         }
+    
+    updateLoginInfo(db, user_email=user["email"], last_login_at=datetime.now(ZoneInfo("Asia/Jakarta")).strftime("%Y-%m-%d %H:%M:%S"))
 
     return {
         "allowed": True,

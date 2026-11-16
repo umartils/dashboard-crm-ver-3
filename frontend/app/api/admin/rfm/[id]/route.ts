@@ -26,6 +26,8 @@ export async function PATCH(request: Request, { params }: Context) {
   const guard = await guardAdmin();
   if (guard.error) return guard.error;
 
+  // const session = await auth();
+
   const id = parseId((await params).id);
   if (id === null) {
     return NextResponse.json({ detail: "ID donor tidak valid" }, { status: 400 });
@@ -43,7 +45,7 @@ export async function PATCH(request: Request, { params }: Context) {
       "X-Internal-Key": process.env.INTERNAL_API_KEY || "",
       "X-User-Email": guard.session!.user!.email || "",
     },
-    body: JSON.stringify({ hp: body.hp, is_valid: body.is_valid }),
+    body: JSON.stringify({ hp: body.hp, is_valid: body.is_valid, updated_by: guard.session!.user!.email || "" }),
     cache: "no-store",
   });
 

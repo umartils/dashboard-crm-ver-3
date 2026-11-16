@@ -20,7 +20,7 @@ def list_users(db: Session, limit: int, offset: int) -> tuple[list[dict], int]:
     rows = db.execute(
         text(
             """
-            SELECT id, email, role, is_active, created_at
+            SELECT id, email, role, is_active, created_at, created_by, last_login_at
             FROM crm_users
             ORDER BY created_at DESC, id DESC
             LIMIT :limit OFFSET :offset
@@ -76,14 +76,41 @@ def existEmail(db: Session, email: str, exclude_id: int):
     
 def getUser(db: Session, user_id: int):
     row = db.execute(
-        text("SELECT id, email, role, is_active, created_at FROM crm_users WHERE id = :id"),
+        text("SELECT id, email, role, is_active, created_at, created_by, last_login_at FROM crm_users WHERE id = :id"),
         {"id": user_id}
     ).mappings().first()    
     return dict(row) if row else None
 
-def updateUser(db: Session, user_id: int, email: str, is_active: bool, role: str):
-    db.execute(text("UPDATE crm_users SET email = :email, is_active = :is_active, role = :role WHERE id = :id"),
-               { "email": email, "id": user_id, "is_active": 1 if is_active else 0, "role": role })
+def updateLoginInfo(db: Session, user_email: str, last_login_at: str ):
+    db.execute(
+        text("""
+             UPDATE crm_users 
+             SET last_login_at = :last_login_at
+             WHERE email = :email
+             """),
+               { 
+                "email": user_email, 
+                "last_login_at": last_login_at, 
+                }
+            )
+    db.commit()
+
+def updateUser(db: Session, user_id: int, email: str, is_active: bool, role: str, updated_by: str | None = None, updated_at: str | None = None):
+    db.execute(
+        text("""
+             UPDATE crm_users 
+             SET email = :email, is_active = :is_active, role = :role, 
+             updated_by = :updated_by, updated_at = :updated_at WHERE id = :id
+             """),
+               { 
+                "email": email, 
+                "id": user_id, 
+                "is_active": 1 if is_active else 0, 
+                "role": role, 
+                "updated_by": updated_by, 
+                "updated_at": updated_at 
+                }
+            )
     db.commit()
 
 def deleteUser(db:Session, user_id: int):

@@ -25,11 +25,18 @@ export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUs
       defaultVisible: true,
       render: (u) => (u.is_active ? "Aktif" : "Nonaktif"),
     },
+    { key: "created_by", label: "Created by", defaultVisible: true },
     {
       key: "created_at",
       label: "Created at",
       defaultVisible: true,
       render: (u) => (u.created_at ? new Date(u.created_at).toLocaleString("id-ID") : "-"),
+    },
+    {
+      key: "last_login_at",
+      label: "Last Login",
+      defaultVisible: true,
+      render: (u) => (u.last_login_at ? new Date(u.last_login_at).toLocaleString("id-ID") : "-"),
     },
     {
       key: "actions",
