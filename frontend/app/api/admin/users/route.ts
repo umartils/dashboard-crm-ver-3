@@ -8,12 +8,8 @@ export async function GET(request: Request) {
 
   if (!session?.user) {
     return NextResponse.json(
-      {
-        detail: "Unauthorized",
-      },
-      {
-        status: 401,
-      }
+      {  detail: "Unauthorized", },
+      { status: 401, }
     );
   }
 
@@ -80,10 +76,22 @@ export async function POST( request: Request ) {
 
   const body = await request.json();
   const email = String(body.email || "").trim().toLowerCase();
+  const role = String(body.role || "user").trim().toLowerCase();
   if (!email) {
     return NextResponse.json(
       {
         detail: "Email wajib diisi",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
+  if (!["admin", "user"].includes(role)) {
+    return NextResponse.json(
+      {
+        detail: "Role tidak valid",
       },
       {
         status: 400,
@@ -99,7 +107,7 @@ export async function POST( request: Request ) {
       headers: {
         "Content-Type":
           "application/json",
-
+ 
         "X-Internal-Key":
           process.env.INTERNAL_API_KEY || "",
 
@@ -107,8 +115,7 @@ export async function POST( request: Request ) {
           session.user.email || "",
       },
 
-      body: JSON.stringify({ email, }),
-
+      body: JSON.stringify({ email, role }),
       cache: "no-store",
     }
   );

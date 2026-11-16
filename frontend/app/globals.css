@@ -1755,6 +1755,7 @@ select:focus {
   align-items: center;
 
   flex: 1;
+  gap: 10px;
   min-width: 240px;
 }
 
@@ -1775,11 +1776,12 @@ select:focus {
 /* Input */
 .header-add-input-wrapper input {
   width: 100%;
-  min-height: 44px;
+  min-height: 46px;
 
   padding: 0 12px 0 40px;
 
-  border: 1px solid #d1d5db;
+  /* border: 1px solid #d1d5db; */
+  border: 1px solid var(--border);
   border-radius: 9px;
 
   background: #ffffff;
@@ -2026,6 +2028,14 @@ select:focus {
   min-height: 46px;
   border-radius: 10px;
   /* margin-top: 10px; */
+}
+
+.app-modal-form .multi-select {
+  width: 100%;
+}
+
+.app-modal-form .multi-select-dropdown {
+  z-index: 10;
 }
 
 .modal-field-label {

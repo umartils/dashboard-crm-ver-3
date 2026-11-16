@@ -31,7 +31,7 @@ def list_users(db: Session, limit: int, offset: int) -> tuple[list[dict], int]:
 
     return [dict(r) for r in rows], int(total)
 
-def create_user(db: Session, email: str, added_by: str | None) -> CrmUser:
+def create_user(db: Session, email: str, role: str, added_by: str | None) -> CrmUser:
     email = email.strip().lower()
 
     # Validasi domain email
@@ -56,7 +56,7 @@ def create_user(db: Session, email: str, added_by: str | None) -> CrmUser:
 
     user = CrmUser(
         email=email,
-        role="user",
+        role=role,
         is_active=True,
         created_by=added_by,
     )

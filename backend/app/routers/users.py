@@ -16,14 +16,6 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/api", dependencies=[Depends(require_internal_key)])
 logger = logging.getLogger(__name__)
 
-# @router.get("/admin/users")
-# def admin_list_users(
-#     db: Session = Depends(get_dashboard_db),
-#     x_user_email: str | None = Header(default=None),
-# ):
-#     require_admin(db, x_user_email)
-#     users = list_users(db)
-#     return {"data": [UserResponse.model_validate(u).model_dump() for u in users]}
 
 class UserUpdate(BaseModel):
     email: str
@@ -60,7 +52,7 @@ def admin_create_user(
     x_user_email: str | None = Header(default=None),
 ):
     require_admin(db, x_user_email)
-    user = create_user(db, payload.email, added_by=x_user_email)
+    user = create_user(db, payload.email, payload.role, added_by=x_user_email)
     return UserResponse.model_validate(user).model_dump()
 
 

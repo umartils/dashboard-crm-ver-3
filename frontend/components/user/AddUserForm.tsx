@@ -4,10 +4,12 @@ import { toast } from "sonner";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, UserPlus } from "lucide-react";
+import SelectFilter from "../ui/SelectFilter";
 
 export default function AddUserForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("user");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -29,7 +31,7 @@ export default function AddUserForm() {
       const response = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
+        body: JSON.stringify({ email: cleanEmail, role }),
       });
 
       const result = await response.json().catch(() => ({}));
@@ -66,6 +68,16 @@ export default function AddUserForm() {
             placeholder="nama@masjidnusantara.org"
             required
             disabled={saving}
+          />
+          <SelectFilter
+            label="Role"
+            paramKey="role"
+            options={["admin", "user"]}
+            labelMap={{ admin: "Admin", user: "User" }}
+            selected={role}
+            onChange={(_, value) => setRole(value)}
+            showAllOption={false}
+            placeholder="Pilih role"
           />
         </div>
 

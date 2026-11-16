@@ -67,7 +67,7 @@ export default function UserEditModal({
             <h3>Edit User ({user.email})</h3>
           </div>
 
-          <button type="button" className="app-modal-header-close" onClick={onClose}>
+          <button type="button" className="app-modal-header-close" onClick={onClose} disabled={saving}>
             ×
           </button>
         </div>
@@ -77,20 +77,6 @@ export default function UserEditModal({
             <span className="modal-field-label">Email</span>
             <input className="app-modal-input-field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={saving} />
           </label>
-
-          {/* <label className="form-field">
-            <span className="modal-field-label">Role</span>
-          </label>
-          <SelectFilter 
-            label="Role"
-            paramKey="role"
-            options={["admin", "user"]}
-            labelMap={{ admin: "Admin", user: "User" }}
-            selected={user}
-            onChange={setRole}
-            showAllOption={false}
-            placeholder="Pilih role"
-          /> */}
 
           <div className="form-field">
             <span className="modal-field-label">Role</span>
@@ -111,7 +97,7 @@ export default function UserEditModal({
             checked={isActive}
             onChange={setIsActive}
             disabled={saving}
-          />
+          /> 
 
           {error && <div className="form-error">{error}</div>}
 
