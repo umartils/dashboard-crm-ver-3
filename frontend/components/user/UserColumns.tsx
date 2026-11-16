@@ -2,6 +2,7 @@
 import type { DataTableColumn } from "@/components/ui/types";
 import type { CRMUser } from "@/lib/types";
 import { SquarePen, Trash2 } from "lucide-react";
+import { formatDateTime } from "@/lib/format";
 
 interface Handlers {
   onEdit: (user: CRMUser) => void;
@@ -30,13 +31,13 @@ export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUs
       key: "created_at",
       label: "Created at",
       defaultVisible: true,
-      render: (u) => (u.created_at ? new Date(u.created_at).toLocaleString("id-ID") : "-"),
+      render: (u) => (u.created_at ? formatDateTime(u.created_at) : "-"),
     },
     {
       key: "last_login_at",
       label: "Last Login",
       defaultVisible: true,
-      render: (u) => (u.last_login_at ? new Date(u.last_login_at).toLocaleString("id-ID") : "-"),
+      render: (u) => (u.last_login_at ? formatDateTime(u.last_login_at) : "-"),
     },
     {
       key: "actions",

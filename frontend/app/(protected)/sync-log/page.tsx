@@ -8,6 +8,7 @@ export type SyncLog = {
   started_at: string | null;
   finished_at: string | null;
   status: string;
+  type: string | null;
   donor_count: number | null;
   message: string | null;
 };

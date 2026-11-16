@@ -29,11 +29,6 @@ log = logging.getLogger(__name__)
 WIB = ZoneInfo("Asia/Jakarta")
 
 
-# def now_wib() -> datetime:
-#     """Waktu Jakarta (naive), tidak tergantung timezone server."""
-#     return datetime.now(WIB).replace(tzinfo=None)
-
-
 # --------------------------------------------------------------------------- #
 # Blacklist donor dummy / internal (dipakai oleh sync RFM)
 # --------------------------------------------------------------------------- #
@@ -55,6 +50,10 @@ EXCLUDED_DONOR_NAMES = (
 )
 
 GLOBAL_LOCK_NAME = "sync:global"
+
+SYNC_RFM = "donor_rfm"
+SYNC_DONOR_SUMMARY = "donor_mn"
+SYNC_BLAST = "blast_conversion"
 
 class SyncAlreadyRunning(RuntimeError):
     """Dilempar ketika ada sync lain yang masih berjalan."""
@@ -103,6 +102,16 @@ def sync_lock(name: str):
     finally:
         conn.close()
 
+import time  # tambahkan di bagian import
+
+@contextmanager
+def timed(label: str):
+    t = time.perf_counter()
+    try:
+        yield
+    finally:
+        log.info("rfm: %s selesai %.1fs", label, time.perf_counter() - t)
+
 
 def with_sync_lock(name: str):
     def deco(fn):
@@ -144,8 +153,49 @@ def read_sql_full(query, engine, chunksize: int = 50_000) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 # Upsert via staging table
 # --------------------------------------------------------------------------- #
-def stage_dataframe(df: pd.DataFrame, staging: str) -> None:
-    df.to_sql(staging, dashboard_engine, if_exists="replace", index=False, chunksize=1000)
+def stage_dataframe(df: pd.DataFrame, staging: str, like: str | None = None) -> None:
+    # Tanpa `like`: perilaku lama (dipakai job sync lain yang belum diubah).
+    if like is None:
+        df.to_sql(staging, dashboard_engine, if_exists="replace", index=False, chunksize=1000)
+        return
+
+    # 1) Buat staging sama seperti target, lalu buang SEMUA index selain PRIMARY.
+    with timed("  staging: DDL"):
+        with dashboard_engine.begin() as conn:
+            conn.execute(text(f"DROP TABLE IF EXISTS `{staging}`"))
+            conn.execute(text(f"CREATE TABLE `{staging}` LIKE `{like}`"))
+            idx = conn.execute(
+                text("""
+                    SELECT DISTINCT index_name
+                    FROM information_schema.statistics
+                    WHERE table_schema = DATABASE()
+                      AND table_name = :t
+                      AND index_name <> 'PRIMARY'
+                """),
+                {"t": staging},
+            ).scalars().all()
+            if idx:
+                drops = ", ".join(f"DROP INDEX `{n}`" for n in idx)
+                conn.execute(text(f"ALTER TABLE `{staging}` {drops}"))
+
+    # 2) Ubah DataFrame jadi list tuple Python (NaN/NaT/NA -> None).
+    with timed("  staging: siapkan baris"):
+        clean = df.astype(object).where(df.notna(), None)
+        rows = list(clean.itertuples(index=False, name=None))
+        col_sql = ", ".join(f"`{c}`" for c in df.columns)
+        ph = ", ".join(["%s"] * len(df.columns))
+        insert_sql = f"INSERT INTO `{staging}` ({col_sql}) VALUES ({ph})"
+
+    # 3) Insert per batch lewat cursor PyMySQL.
+    with timed("  staging: insert"):
+        raw = dashboard_engine.raw_connection()
+        try:
+            cur = raw.cursor()
+            for i in range(0, len(rows), 10_000):
+                cur.executemany(insert_sql, rows[i:i + 10_000])
+            raw.commit()
+        finally:
+            raw.close()
 
 
 def build_upsert_sql(target: str, staging: str, cols: list[str], no_update=()) -> str:
@@ -164,14 +214,13 @@ def build_upsert_sql(target: str, staging: str, cols: list[str], no_update=()) -
     ON DUPLICATE KEY UPDATE {update_clause}
     """
 
-
 def drop_staging(staging: str) -> None:
     with dashboard_engine.begin() as conn:
         conn.execute(text(f"DROP TABLE IF EXISTS `{staging}`"))
 
 
 def upsert_via_staging(df: pd.DataFrame, target: str, staging: str, no_update=()) -> None:
-    stage_dataframe(df, staging)
+    stage_dataframe(df, staging, like=target)
     try:
         sql = build_upsert_sql(target, staging, list(df.columns), no_update)
         with dashboard_engine.begin() as conn:
@@ -183,12 +232,9 @@ def upsert_via_staging(df: pd.DataFrame, target: str, staging: str, no_update=()
 # --------------------------------------------------------------------------- #
 # Pencatatan SyncRun
 # --------------------------------------------------------------------------- #
+
 def start_run(db, sync_type: str) -> SyncRun:
-    kwargs = {"status": "running"}
-    # Kolom sync_type opsional: kalau belum ditambahkan di model, di-skip.
-    if hasattr(SyncRun, "sync_type"):
-        kwargs["sync_type"] = sync_type
-    run = SyncRun(**kwargs)
+    run = SyncRun(status="running", sync_type=sync_type)
     db.add(run)
     db.commit()
     db.refresh(run)

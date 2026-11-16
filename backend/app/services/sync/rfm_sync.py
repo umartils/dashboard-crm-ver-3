@@ -10,12 +10,14 @@ from app.services.rfm import build_rfm_donor
 from app.services.sync.sync_common import (
     EXCLUDED_DONOR_IDS,
     EXCLUDED_DONOR_NAMES,
+    SYNC_RFM,
     build_upsert_sql,
     drop_staging,
     mark_failed,
     mark_success,
     now_wib,
     read_sql_full,
+    timed,
     stage_dataframe,
     start_run,
     with_sync_lock,
@@ -84,56 +86,66 @@ def _detect_segment_changes(df: pd.DataFrame) -> pd.DataFrame:
     return changed.rename(
         columns={"rfm_segment_old": "old_segment", "rfm_segment_new": "new_segment"}
     )[["id_donor", "old_segment", "new_segment"]]
-
-@with_sync_lock("rfm")
+    
+@with_sync_lock(SYNC_RFM)
 def run_rfm_sync() -> dict:
     db = DashboardSessionLocal()
-    run = start_run(db, "rfm")
+    run = start_run(db, SYNC_RFM)
     try:
-        donors = read_sql_full(QUERY_DONOR, source_engine)
-        trx = read_sql_full(QUERY_TRANSAKSI, source_engine)
-        programs = pd.read_sql(text(QUERY_PROGRAM), source_engine)
-        payments = pd.read_sql(text(QUERY_PAYMENT), source_engine)
+        with timed("baca donor"):
+            donors = read_sql_full(QUERY_DONOR, source_engine)
+        with timed("baca transaksi"):
+            trx = read_sql_full(QUERY_TRANSAKSI, source_engine)
+        with timed("baca program+payment"):
+            programs = pd.read_sql(text(QUERY_PROGRAM), source_engine)
+            payments = pd.read_sql(text(QUERY_PAYMENT), source_engine)
         log.info("rfm: source dibaca (donor=%d, transaksi=%d)", len(donors), len(trx))
 
-        summary = build_rfm_donor(donors, trx, programs, payments)
+        with timed("build_rfm_donor"):
+            summary = build_rfm_donor(donors, trx, programs, payments)
+        log.info("rfm: summary=%d baris, %d kolom", len(summary), len(summary.columns))
         del donors, trx
         gc.collect()
 
-        segment_changes = _detect_segment_changes(summary)
+        with timed("staging"):
+            stage_dataframe(summary, STAGING_TABLE, like=TARGET_TABLE)
+        db.commit()  # akhiri transaksi lama agar melihat staging
 
-        # Tulis staging (DDL) dulu, lalu akhiri transaksi lama sebelum upsert.
-        stage_dataframe(summary, STAGING_TABLE)
-        db.commit()
-        sql = build_upsert_sql(
-            TARGET_TABLE, STAGING_TABLE, list(summary.columns), no_update=NO_UPDATE_COLS
-        )
-        db.execute(text(sql))
+        # Harus sebelum upsert: membandingkan dengan donor_summary yang belum ditimpa.
+        with timed("deteksi perubahan segmen"):
+            segment_changes = _detect_segment_changes(summary)
 
-        if not segment_changes.empty:
-            changed_at = now_wib()
-            db.bulk_save_objects(
-                [
-                    DonorSegmentHistory(
-                        id_donor=row.id_donor,
-                        old_segment=row.old_segment,
-                        new_segment=row.new_segment,
-                        sync_run_id=run.id,
-                        changed_at=changed_at,
-                    )
-                    for row in segment_changes.itertuples(index=False)
-                ]
+        with timed("upsert"):
+            sql = build_upsert_sql(
+                TARGET_TABLE, STAGING_TABLE, list(summary.columns), no_update=NO_UPDATE_COLS
             )
+            db.execute(text(sql))
 
-        mark_success(
-            run,
-            donor_count=len(summary),
-            message=(
-                f"Synced {len(summary)} valid donors, "
-                f"{len(segment_changes)} segment changes detected"
-            ),
-        )
-        db.commit()
+        with timed("riwayat segmen + commit"):
+            if not segment_changes.empty:
+                changed_at = now_wib()
+                db.bulk_save_objects(
+                    [
+                        DonorSegmentHistory(
+                            id_donor=row.id_donor,
+                            old_segment=row.old_segment,
+                            new_segment=row.new_segment,
+                            sync_run_id=run.id,
+                            changed_at=changed_at,
+                        )
+                        for row in segment_changes.itertuples(index=False)
+                    ]
+                )
+            mark_success(
+                run,
+                donor_count=len(summary),
+                message=(
+                    f"Synced {len(summary)} valid donors, "
+                    f"{len(segment_changes)} segment changes detected"
+                ),
+            )
+            db.commit()
+
         return {
             "status": "success",
             "donor_count": len(summary),

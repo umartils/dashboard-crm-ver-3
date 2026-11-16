@@ -889,7 +889,7 @@ select:focus {
   background: #ffffff;
   color: #374151;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -1993,7 +1993,7 @@ select:focus {
   color: var(--charcoal-muted, #6b7280);
 }
 
-.app-modal-header {
+.app-modal-header { 
   display: flex; 
   align-items: center; 
   justify-content: flex-start; 
@@ -2027,6 +2027,9 @@ select:focus {
   height: 46px;
   min-height: 46px;
   border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 12px;
   /* margin-top: 10px; */
 }
 
@@ -2413,7 +2416,7 @@ select:focus {
 
 .sync-status-failed {
   background: var(--danger-tint);
-  color: var(--danger-dark);
+  color: var(--danger);
 }
 
 /* Running uses the brand palette so it reads as "in progress", not success/error */

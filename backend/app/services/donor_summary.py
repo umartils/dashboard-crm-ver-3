@@ -10,74 +10,169 @@ from sqlalchemy import text, bindparam
 # Reuse fungsi cleaning yang sudah ada di rfm.py — jangan duplikat logic
 # format nomor telp / nama / penggabungan id_donor duplikat, supaya identitas
 # donor di tabel ringkasan ini konsisten dengan donor_summary (RFM).
+import numpy as np
 from app.services.rfm import (
-    format_phone,
-    is_valid_phone,
-    standardize_name,
+    format_phone_series,
+    is_valid_phone_series,
+    standardize_name_series,
+    get_campaign_series,
+    pick_names,
     build_canonical_map,
-    pick_representative_name,
-    get_campaign 
 )
- 
-def jenis_donor_label(id_jenis, nominal, id_crm, id_donor):
-    if id_crm in ("1012022001041", "1012024001088", "1082018001020", "10320170010016"): 
-        return "CorCom"
-    if id_crm == "1022021001036" and nominal >= 10000000:
-        return "Platinum"
-    if id_donor in ("26090300100142", "17041800100001", "26090300100144", "17033000100383"
+
+CORCOM_CRM_IDS = ("1012022001041", "1012024001088", "1082018001020", "10320170010016")
+
+# SALIN APA ADANYA dari kode lama (termasuk koma yang hilang) supaya hasil
+# verifikasi identik. Perbaikan ada di bagian "Bug" di bawah.
+CORCOM_DONOR_IDS = ("26090300100142", "17041800100001", "26090300100144", "17033000100383"
                     "18020100100003", "22040600100085", "18051500100878", "23090400100004"
                     "17033000100322", "26090300100145", "21103000100039", "18060500100022"
-                    "17081800100006", "20923000100325", "18121100100005"):
-        return "Corcom"
-    # if id_crm == "1022021001036" and nominal < 10000000:
-    #     return "Retail (Pak Danar)"
-    if nominal >= 10000000 and id_jenis == 1:
-        return "Platinum"
-    if id_jenis == 1:
-        return "Personal"
-    if id_jenis in (2,3):
-        return "CorCom"
-    if id_jenis == 5:
-        return "Crowdfunding"
-    # if id_jenis == 3:
-    #     return "Corporate"
-    return "Personal"
+                    "17081800100006", "20923000100325", "18121100100005")
 
+ 
+# def jenis_donor_label(id_jenis, nominal, id_crm, id_donor):
+#     if id_crm in ("1012022001041", "1012024001088", "1082018001020", "10320170010016"): 
+#         return "CorCom"
+#     if id_crm == "1022021001036" and nominal >= 10000000:
+#         return "Platinum"
+#     if id_donor in ("26090300100142", "17041800100001", "26090300100144", "17033000100383"
+#                     "18020100100003", "22040600100085", "18051500100878", "23090400100004"
+#                     "17033000100322", "26090300100145", "21103000100039", "18060500100022"
+#                     "17081800100006", "20923000100325", "18121100100005"):
+#         return "Corcom"
+#     # if id_crm == "1022021001036" and nominal < 10000000:
+#     #     return "Retail (Pak Danar)"
+#     if nominal >= 10000000 and id_jenis == 1:
+#         return "Platinum"
+#     if id_jenis == 1:
+#         return "Personal"
+#     if id_jenis in (2,3):
+#         return "CorCom"
+#     if id_jenis == 5:
+#         return "Crowdfunding"
+#     # if id_jenis == 3:
+#     #     return "Corporate"
+#     return "Personal"
+
+def jenis_donor_summary_series(out: pd.DataFrame) -> pd.Series:
+    nominal, jenis, crm, did = out["max_donation"], out["id_jenis"], out["id_crm"], out["id_donor"]
+    conds = [
+        crm.isin(CORCOM_CRM_IDS),
+        (crm == "1022021001036") & (nominal >= 10_000_000),
+        did.isin(CORCOM_DONOR_IDS),
+        (nominal >= 10_000_000) & (jenis == 1),
+        jenis == 1,
+        jenis.isin([2, 3]),
+        jenis == 5,
+    ]
+    choices = ["CorCom", "Platinum", "Corcom", "Platinum", "Personal", "CorCom", "Crowdfunding"]
+    return pd.Series(np.select(conds, choices, default="Personal"), index=out.index)
+
+
+
+# def build_donor_summary(df_donor: pd.DataFrame, df_transaksi: pd.DataFrame) -> pd.DataFrame:
+#     """
+#     Bangun ringkasan donatur (bukan RFM): nama, no telp, jumlah donasi,
+#     total donasi, tanggal donasi terakhir, dan campaign terakhir.
+
+#     df_donor  : kolom minimal -> id_donor, nama_donor, hp_donor
+#     df_transaksi : kolom minimal -> id_donor, nominal, tanggal_donasi, keterangan
+#     """
+#     donor = df_donor.copy()
+#     trx = df_transaksi.copy()
+
+#     donor["phone_clean"] = donor["hp_donor"].apply(format_phone).astype("string")
+#     donor["phone_valid"] = donor["phone_clean"].apply(is_valid_phone)
+#     donor["nama_clean"] = donor["nama_donor"].apply(standardize_name)
+
+#     # Gabungkan id_donor duplikat berdasarkan no HP yang valid — sama seperti
+#     # yang dipakai untuk donor_summary, supaya 1 orang tidak terhitung sebagai
+#     # 2 donatur berbeda hanya karena id_donatur-nya beda.
+#     canonical = build_canonical_map(donor, trx)
+#     donor["id_donor_final"] = donor["id_donor"].map(lambda x: canonical.get(x, x))
+#     trx["id_donor_final"] = trx["id_donor"].map(lambda x: canonical.get(x, x))
+#     trx["campaign"] = trx["keterangan"].apply(get_campaign)
+
+#     names = (
+#         donor.groupby("id_donor_final")["nama_clean"]
+#         .apply(pick_representative_name)
+#         .rename("nama_final")
+#     )
+#     donor = donor.merge(names, on="id_donor_final", how="left")
+
+#     donor_master = (
+#         donor.groupby("id_donor_final")
+#         .agg(
+#             nama=("nama_final", "first"), 
+#             no_telp=("phone_clean", "first"),
+#             id_jenis=("id_jenis", "first"),
+#             id_crm=("id_crm", "first"),
+#         )
+#         .reset_index()
+#         .rename(columns={"id_donor_final": "id_donor"})
+#     )
+
+#     trx = trx[trx["id_donor_final"].isin(donor_master["id_donor"])]
+#     trx["tanggal_donasi"] = pd.to_datetime(trx["tanggal_donasi"])
+
+#     # Campaign terakhir diambil dari baris transaksi paling baru per donor,
+#     # bukan campaign paling sering muncul (beda tujuan dari campaign_favorit di RFM)
+#     idx_last = trx.groupby("id_donor_final")["tanggal_donasi"].idxmax()
+#     last_campaign = trx.loc[idx_last, ["id_donor_final", "campaign", "nominal"]].rename(
+#         columns={
+#             "campaign": "campaign_terakhir",
+#             "nominal": "last_donation"
+#         }
+#     )
+     
+#     agg = trx.groupby("id_donor_final").agg(
+#         jumlah_donasi=("nominal", "count"),
+#         total_donasi=("nominal", "sum"),
+#         max_donation=("nominal", max),
+#         tgl_terakhir=("tanggal_donasi", "max"),
+#     ).reset_index()
+
+#     out = donor_master.merge(agg, left_on="id_donor", right_on="id_donor_final", how="inner")
+#     out = out.merge(
+#         last_campaign,
+#         left_on="id_donor",
+#         right_on="id_donor_final",
+#         how="left",
+#         suffixes=("", "_drop"),
+#     )
+#     out["jenis_donor"] = out.apply(
+#                 lambda row: jenis_donor_label(row["id_jenis"], row["max_donation"], 
+#                                               row["id_crm"], row['id_donor']),  axis=1
+#             )
+#     out = out.drop(columns=[c for c in out.columns if c.endswith("_drop") or c == "id_donor_final"])
+ 
+#     out["tgl_terakhir"] = pd.to_datetime(out["tgl_terakhir"], errors="coerce").dt.date
+#     out["total_donasi"] = out["total_donasi"].round(2)
+
+#     return out[
+#         [
+#             "id_donor", "nama", "no_telp", "jenis_donor", "jumlah_donasi", 
+#             "total_donasi", "last_donation", "max_donation", "tgl_terakhir", "campaign_terakhir"
+#         ]
+#     ]
 
 def build_donor_summary(df_donor: pd.DataFrame, df_transaksi: pd.DataFrame) -> pd.DataFrame:
-    """
-    Bangun ringkasan donatur (bukan RFM): nama, no telp, jumlah donasi,
-    total donasi, tanggal donasi terakhir, dan campaign terakhir.
-
-    df_donor  : kolom minimal -> id_donor, nama_donor, hp_donor
-    df_transaksi : kolom minimal -> id_donor, nominal, tanggal_donasi, keterangan
-    """
     donor = df_donor.copy()
-    trx = df_transaksi.copy()
+    trx = df_transaksi[["id_donor", "nominal", "tanggal_donasi", "keterangan"]].copy()
 
-    donor["phone_clean"] = donor["hp_donor"].apply(format_phone).astype("string")
-    donor["phone_valid"] = donor["phone_clean"].apply(is_valid_phone)
-    donor["nama_clean"] = donor["nama_donor"].apply(standardize_name)
+    donor["phone_clean"] = format_phone_series(donor["hp_donor"])
+    donor["phone_valid"] = is_valid_phone_series(donor["phone_clean"])
+    donor["nama_clean"] = standardize_name_series(donor["nama_donor"])
 
-    # Gabungkan id_donor duplikat berdasarkan no HP yang valid — sama seperti
-    # yang dipakai untuk donor_summary, supaya 1 orang tidak terhitung sebagai
-    # 2 donatur berbeda hanya karena id_donatur-nya beda.
     canonical = build_canonical_map(donor, trx)
-    donor["id_donor_final"] = donor["id_donor"].map(lambda x: canonical.get(x, x))
-    trx["id_donor_final"] = trx["id_donor"].map(lambda x: canonical.get(x, x))
-    trx["campaign"] = trx["keterangan"].apply(get_campaign)
-
-    names = (
-        donor.groupby("id_donor_final")["nama_clean"]
-        .apply(pick_representative_name)
-        .rename("nama_final")
-    )
-    donor = donor.merge(names, on="id_donor_final", how="left")
+    donor["id_donor_final"] = donor["id_donor"].map(canonical).fillna(donor["id_donor"])
+    trx["id_donor_final"] = trx["id_donor"].map(canonical).fillna(trx["id_donor"])
+    donor["nama_final"] = donor["id_donor_final"].map(pick_names(donor)).fillna("Sobat Masjid")
 
     donor_master = (
         donor.groupby("id_donor_final")
         .agg(
-            nama=("nama_final", "first"), 
+            nama=("nama_final", "first"),
             no_telp=("phone_clean", "first"),
             id_jenis=("id_jenis", "first"),
             id_crm=("id_crm", "first"),
@@ -86,47 +181,39 @@ def build_donor_summary(df_donor: pd.DataFrame, df_transaksi: pd.DataFrame) -> p
         .rename(columns={"id_donor_final": "id_donor"})
     )
 
-    trx = trx[trx["id_donor_final"].isin(donor_master["id_donor"])]
+    trx = trx[trx["id_donor_final"].isin(donor_master["id_donor"])].copy()
     trx["tanggal_donasi"] = pd.to_datetime(trx["tanggal_donasi"])
 
-    # Campaign terakhir diambil dari baris transaksi paling baru per donor,
-    # bukan campaign paling sering muncul (beda tujuan dari campaign_favorit di RFM)
+    # Campaign hanya diekstrak untuk baris terakhir per donor.
     idx_last = trx.groupby("id_donor_final")["tanggal_donasi"].idxmax()
-    last_campaign = trx.loc[idx_last, ["id_donor_final", "campaign", "nominal"]].rename(
-        columns={
-            "campaign": "campaign_terakhir",
-            "nominal": "last_donation"
-        }
+    last = trx.loc[idx_last, ["id_donor_final", "keterangan", "nominal"]].rename(
+        columns={"nominal": "last_donation"}
     )
-     
-    agg = trx.groupby("id_donor_final").agg(
-        jumlah_donasi=("nominal", "count"),
-        total_donasi=("nominal", "sum"),
-        max_donation=("nominal", max),
-        tgl_terakhir=("tanggal_donasi", "max"),
-    ).reset_index()
+    last["campaign_terakhir"] = get_campaign_series(last["keterangan"])
+    last = last.drop(columns="keterangan").rename(columns={"id_donor_final": "id_donor"})
 
-    out = donor_master.merge(agg, left_on="id_donor", right_on="id_donor_final", how="inner")
-    out = out.merge(
-        last_campaign,
-        left_on="id_donor",
-        right_on="id_donor_final",
-        how="left",
-        suffixes=("", "_drop"),
+    agg = (
+        trx.groupby("id_donor_final")
+        .agg(
+            jumlah_donasi=("nominal", "count"),
+            total_donasi=("nominal", "sum"),
+            max_donation=("nominal", "max"),
+            tgl_terakhir=("tanggal_donasi", "max"),
+        )
+        .reset_index()
+        .rename(columns={"id_donor_final": "id_donor"})
     )
-    out["jenis_donor"] = out.apply(
-                lambda row: jenis_donor_label(row["id_jenis"], row["max_donation"], 
-                                              row["id_crm"], row['id_donor']),  axis=1
-            )
-    out = out.drop(columns=[c for c in out.columns if c.endswith("_drop") or c == "id_donor_final"])
- 
+    del trx
+
+    out = donor_master.merge(agg, on="id_donor", how="inner").merge(last, on="id_donor", how="left")
+    out["jenis_donor"] = jenis_donor_summary_series(out)
     out["tgl_terakhir"] = pd.to_datetime(out["tgl_terakhir"], errors="coerce").dt.date
     out["total_donasi"] = out["total_donasi"].round(2)
 
     return out[
         [
-            "id_donor", "nama", "no_telp", "jenis_donor", "jumlah_donasi", 
-            "total_donasi", "last_donation", "max_donation", "tgl_terakhir", "campaign_terakhir"
+            "id_donor", "nama", "no_telp", "jenis_donor", "jumlah_donasi",
+            "total_donasi", "last_donation", "max_donation", "tgl_terakhir", "campaign_terakhir",
         ]
     ]
     

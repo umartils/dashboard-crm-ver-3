@@ -60,6 +60,7 @@ class SyncRun(Base):
     # started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     started_at: Mapped[datetime] = mapped_column(DateTime, default=now_wib)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime)
+    sync_type: Mapped[str | None] = mapped_column(String(30), index=True)
     status: Mapped[str] = mapped_column(String(32), default="running")
     donor_count: Mapped[int | None] = mapped_column(Integer)
     message: Mapped[str | None] = mapped_column(String(500))

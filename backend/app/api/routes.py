@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 import logging
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from app.services.rfm import get_campaign
 from app.core.security import require_internal_key, require_admin
-from app.db.session import get_dashboard_db, source_engine
+from app.db.session import get_dashboard_db
 from app.services.analytics import get_dashboard_summary, get_donor_type_breakdown
 from app.services.sync.rfm_sync import run_rfm_sync
 
@@ -63,6 +62,7 @@ def sync_log(db: Session = Depends(get_dashboard_db)):
                 started_at,
                 finished_at,
                 status,
+                sync_type AS type,
                 donor_count,
                 message
             FROM sync_run

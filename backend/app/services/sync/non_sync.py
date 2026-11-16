@@ -6,7 +6,7 @@ from sqlalchemy import bindparam, text
 
 from app.db.session import source_engine, dashboard_engine, DashboardSessionLocal
 # from app.models.donor_segment_history import DonorSegmentHistory
-from app.services.rfm import format_phone, is_valid_phone, standardize_name
+from app.services.rfm import format_phone_series, is_valid_phone_series, standardize_name_series
 from app.services.sync.sync_common import (
     EXCLUDED_DONOR_IDS,
     EXCLUDED_DONOR_NAMES,
@@ -60,12 +60,14 @@ def run_donor_non_sync() -> dict:
         donors = read_sql_full(QUERY_DONOR, source_engine)
         trx = read_sql_full(QUERY_TRANSAKSI, source_engine) 
         df_final = donors[~donors["id_donor"].isin(trx["id_donor"])].copy()
-        
-        df_final['hp'] = df_final['hp_donor'].apply(format_phone).astype("string")
+         
+        # df_final['hp'] = df_final['hp_donor'].apply(format_phone).astype("string")
+        df_final['hp'] = format_phone_series(df_final['hp_donor']).astype("string")
         df_final["hp"] = df_final["hp"].where(df_final["hp"].str.len() <= 15)
         dup = df_final["hp"].notna() & df_final.duplicated("hp", keep="first")
         df_final.loc[dup, "hp"] = pd.NA
-        df_final["is_valid"] = df_final["hp"].apply(is_valid_phone)
+        # df_final["is_valid"] = df_final["hp"].apply(is_valid_phone)
+        df_final["is_valid"] = is_valid_phone_series(df_final["hp"])
         df_final['is_active'] = df_final['is_valid'].astype(int)
         
         df_final['tgl_reg'] = pd.to_datetime(df_final["tgl_reg"].replace(
@@ -73,7 +75,8 @@ def run_donor_non_sync() -> dict:
         df_final["tgl_reg"] = df_final["tgl_reg"].astype(object)
         df_final.loc[df_final["tgl_reg"].isna(), "tgl_reg"] = None
         
-        df_final['nama_donor'] = df_final['nama_donor'].apply(standardize_name)
+        # df_final['nama_donor'] = df_final['nama_donor'].apply(standardize_name)
+        df_final['nama_donor'] = standardize_name_series(df_final['nama_donor'])
         
         df_final = df_final[['id_donor', 'nama_donor', 'email_donor', 'hp', 'is_valid', 'tgl_reg']]
         df_final = df_final[df_final['nama_donor'].fillna("").str.strip() != ""]

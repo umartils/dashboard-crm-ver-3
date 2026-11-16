@@ -8,6 +8,7 @@ from sqlalchemy import text
 from app.db.session import source_engine, DashboardSessionLocal
 from app.services.donor_summary import build_donor_summary
 from app.services.sync.sync_common import (
+    SYNC_DONOR_SUMMARY,
     mark_failed,
     mark_success,
     read_sql_full,
@@ -46,14 +47,14 @@ QUERY_TRANSAKSI = text(
 )
 
 
-@with_sync_lock("donor_summary")
+@with_sync_lock(SYNC_DONOR_SUMMARY)
 def run_donor_summary_sync() -> dict:
     """
     Sync terpisah dari run_rfm_sync(): tabel ini tidak menyimpan komponen RFM.
-    Riwayat dicatat di SyncRun dengan sync_type="donor_summary".
+    Riwayat dicatat di SyncRun dengan sync_type=SYNC_DONOR_SUMMARY.
     """
     db = DashboardSessionLocal()
-    run = start_run(db, "donor_summary")
+    run = start_run(db, SYNC_DONOR_SUMMARY)
     try:
         donors = read_sql_full(QUERY_DONOR_SUMMARY, source_engine)
         trx = read_sql_full(QUERY_TRANSAKSI, source_engine)
@@ -65,7 +66,7 @@ def run_donor_summary_sync() -> dict:
 
         upsert_via_staging(ringkasan, TARGET_TABLE, STAGING_TABLE, no_update=("id_donor",))
 
-        mark_success(run, len(ringkasan), f"Synced {len(ringkasan)} donor ringkasan rows")
+        mark_success(run, len(ringkasan), f"Synced {len(ringkasan)} donor MN")
         db.commit()
         return {"status": "success", "donor_count": len(ringkasan)}
     except Exception as exc:

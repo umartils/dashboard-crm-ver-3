@@ -26,6 +26,12 @@ scheduler = BackgroundScheduler(timezone="Asia/Jakarta")
 log = logging.getLogger(__name__)
 _leader_lock_file = None
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    force=True,   # timpa handler root yang mungkin sudah terpasang
+)
+
 
 def _seed_bootstrap_admin() -> None:
     if not settings.bootstrap_admin_email:

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.services.filters import build_segment_history_filters, build_donor_filters, build_blast_result_filters
 from app.services.export import export_rfm_xlsx, export_donor_history_xlsx
 import math
-from app.services.rfm import get_campaign
+from app.services.rfm import get_campaign_series
 from pydantic import BaseModel
 from app.core.timeutil import now_wib
 
@@ -280,7 +280,7 @@ def donor_detail(
     for row in history:
         item = dict(row)
 
-        item["campaign"] = get_campaign(item.get("keterangan"))
+        item["campaign"] = get_campaign_series(item.get("keterangan"))
         item.pop("keterangan", None)
 
         recent_donations.append(item)

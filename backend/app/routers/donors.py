@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.security import require_internal_key
 from app.db.session import get_dashboard_db, source_engine
 from app.services.filters import build_donor_summary_filters, filterSearch
-from app.services.rfm import get_campaign
+from app.services.rfm import get_campaign_series
 from app.services.sync.donor_sync import run_donor_summary_sync
 from app.services.sync.non_sync import run_donor_non_sync
 from app.services.export import export_donors_xlsx, export_donor_non_xlsx
@@ -307,7 +307,7 @@ def donor_summary_detail(
     recent_donations = []
     for row in history:
         item = dict(row)
-        item["campaign"] = get_campaign(item.get("keterangan"))
+        item["campaign"] = get_campaign_series(item.get("keterangan"))
         item.pop("keterangan", None)
         recent_donations.append(item)
 

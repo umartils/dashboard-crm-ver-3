@@ -4,6 +4,8 @@ import re
 import pandas as pd
 import numpy as np
 
+from app.core.timeutil import now_wib
+
 SUSPICIOUS_PHONE_PATTERNS = {
     "sequential_ascending": re.compile(r"0123456789|1234567890|123456789"),
     "sequential_descending": re.compile(r"9876543210|987654321"),
@@ -63,91 +65,90 @@ PROGRAM_CATEGORIES = {
     "Kemanusiaan": 'Kemanusiaan'
 }
 
-def format_phone(hp):
-    if pd.isna(hp):
-        return None
-    raw = str(hp).strip()
-    if not raw:
-        return None
-    cleaned = re.sub(r"[^\d+]", "", raw)
-    if cleaned.startswith("+62"):
-        return "62" + cleaned[3:]
-    if cleaned.startswith("62"):
-        return cleaned
-    if cleaned.startswith("08"):
-        return "62" + cleaned[1:]
-    if cleaned.startswith("8"):
-        return "62" + cleaned
-    if cleaned.startswith("0"):
-        return "62" + cleaned[1:]
-    return None
+# def format_phone(hp):
+#     if pd.isna(hp):
+#         return None
+#     raw = str(hp).strip()
+#     if not raw:
+#         return None
+#     cleaned = re.sub(r"[^\d+]", "", raw)
+#     if cleaned.startswith("+62"):
+#         return "62" + cleaned[3:]
+#     if cleaned.startswith("62"):
+#         return cleaned
+#     if cleaned.startswith("08"):
+#         return "62" + cleaned[1:]
+#     if cleaned.startswith("8"):
+#         return "62" + cleaned
+#     if cleaned.startswith("0"):
+#         return "62" + cleaned[1:]
+#     return None
 
 
-def is_valid_phone(phone: str | None) -> bool:
-    if not isinstance(phone, str) or not re.match(r"^628\d{7,11}$", phone):
-        return False
-    return not any(pattern.search(phone) for pattern in SUSPICIOUS_PHONE_PATTERNS.values())
+# def is_valid_phone(phone: str | None) -> bool:
+#     if not isinstance(phone, str) or not re.match(r"^628\d{7,11}$", phone):
+#         return False
+#     return not any(pattern.search(phone) for pattern in SUSPICIOUS_PHONE_PATTERNS.values())
 
 
-def standardize_name(name):
-    if pd.isna(name) or not str(name).strip():
-        return "Sobat Masjid"
-    value = str(name).strip()
-    lowered = value.lower()
-    if lowered in ANONYMOUS_PATTERNS or len(lowered) <= 2:
-        return "Sobat Masjid"
-    return value.title()
+# def standardize_name(name):
+#     if pd.isna(name) or not str(name).strip():
+#         return "Sobat Masjid"
+#     value = str(name).strip()
+#     lowered = value.lower()
+#     if lowered in ANONYMOUS_PATTERNS or len(lowered) <= 2:
+#         return "Sobat Masjid"
+#     return value.title()
 
+# def program_category(program_name):
+#     for category, names in PROGRAM_CATEGORIES.items():
+#         if isinstance(names, list):
+#             if program_name in names:
+#                 return category
+#         elif isinstance(names, str):
+#             if program_name == names:
+#                 return category
+#     return "Lainnya"
 
-def program_category(program_name):
-    for category, names in PROGRAM_CATEGORIES.items():
-        if isinstance(names, list):
-            if program_name in names:
-                return category
-        elif isinstance(names, str):
-            if program_name == names:
-                return category
-    return "Lainnya"
-
-def pick_representative_name(names):
-    valid = [n for n in names if n != "Sobat Masjid"]
-    if not valid:
-        return "Sobat Masjid"
-    return pd.Series(valid).value_counts().idxmax()
+# def pick_representative_name(names):
+#     valid = [n for n in names if n != "Sobat Masjid"]
+#     if not valid:
+#         return "Sobat Masjid"
+#     return pd.Series(valid).value_counts().idxmax()
 
 MAX_CAMPAIGN_LENGTH = 255
 
-def get_campaign(keterangan):
-    if not isinstance(keterangan, str):
-        return None
+# def get_campaign(keterangan):
+#     if not isinstance(keterangan, str):
+#         return None
 
-    parts = keterangan.split(" | ")
+#     parts = keterangan.split(" | ")
 
-    if len(parts) >= 3:
-        campaign = parts[2].strip()
+#     if len(parts) >= 3:
+#         campaign = parts[2].strip()
 
-        if 0 < len(campaign) <= MAX_CAMPAIGN_LENGTH:
-            return campaign
+#         if 0 < len(campaign) <= MAX_CAMPAIGN_LENGTH:
+#             return campaign
 
-    return None
+#     return None
 
 
-def build_canonical_map(df_donor: pd.DataFrame, df_transactions: pd.DataFrame) -> dict:
-    # Dedup/penggabungan id_donor duplikat HANYA dilakukan untuk nomor yang valid.
-    # Nomor invalid tidak digabung karena tidak bisa dipercaya sebagai kunci pencocokan.
-    valid = df_donor[df_donor["phone_valid"]].copy()
-    trx_count = df_transactions.groupby("id_donor").size().rename("trx_count")
-    valid = valid.merge(trx_count, on="id_donor", how="left")
-    valid["trx_count"] = valid["trx_count"].fillna(0)
-    result = {}
-    for _, group in valid.groupby("phone_clean"):
-        if group["id_donor"].nunique() <= 1:
-            continue
-        group = group.sort_values(["trx_count", "id_donor"], ascending=[False, True])
-        canonical = group.iloc[0]["id_donor"]
-        for donor_id in group["id_donor"]:
-            result[donor_id] = canonical
-    return result
+# def build_canonical_map(df_donor: pd.DataFrame, df_transactions: pd.DataFrame) -> dict:
+#     # Dedup/penggabungan id_donor duplikat HANYA dilakukan untuk nomor yang valid.
+#     # Nomor invalid tidak digabung karena tidak bisa dipercaya sebagai kunci pencocokan.
+#     valid = df_donor[df_donor["phone_valid"]].copy()
+#     trx_count = df_transactions.groupby("id_donor").size().rename("trx_count")
+#     valid = valid.merge(trx_count, on="id_donor", how="left")
+#     valid["trx_count"] = valid["trx_count"].fillna(0)
+#     result = {}
+#     for _, group in valid.groupby("phone_clean"):
+#         if group["id_donor"].nunique() <= 1:
+#             continue
+#         group = group.sort_values(["trx_count", "id_donor"], ascending=[False, True])
+#         canonical = group.iloc[0]["id_donor"]
+#         for donor_id in group["id_donor"]:
+#             result[donor_id] = canonical
+#     return result
 
 
 def get_favorite(df, group_col, target_col, output_col):
@@ -238,35 +239,206 @@ def jenis_donor_label(id_jenis, nominal, id_crm):
     #     return "Corporate"
     return "Retail"
 
+# UPDATE
+
+DUMMY_ID = "9999999999999"
+CORCOM_CRM_IDS = ("1012022001041", "1012024001088", "1082018001020", "10320170010016")
+
+_CATEGORY_LOOKUP = {}
+for _cat, _names in PROGRAM_CATEGORIES.items():
+    for _n in ([_names] if isinstance(_names, str) else _names):
+        _CATEGORY_LOOKUP.setdefault(_n, _cat) 
+        
+def format_phone_series(s: pd.Series) -> pd.Series:
+    c = s.astype("string").str.strip().str.replace(r"[^\d+]", "", regex=True)
+    out = pd.Series(pd.NA, index=c.index, dtype="string")
+    m1 = c.str.startswith("+62").fillna(False).astype(bool)
+    m2 = ~m1 & c.str.startswith("62").fillna(False).astype(bool)
+    m3 = ~m1 & ~m2 & c.str.startswith("0").fillna(False).astype(bool)   # "08..." dan "0..." sama-sama "62"+c[1:]
+    m4 = ~m1 & ~m2 & ~m3 & c.str.startswith("8").fillna(False).astype(bool)
+    out[m1] = "62" + c[m1].str[3:]
+    out[m2] = c[m2]
+    out[m3] = "62" + c[m3].str[1:]
+    out[m4] = "62" + c[m4]
+    return out
+
+
+def is_valid_phone_series(p: pd.Series) -> pd.Series:
+    ok = p.str.match(r"^628\d{7,11}$").fillna(False).astype(bool)
+    # jangan digabung jadi satu regex: backreference \1 akan bergeser nomor grupnya
+    for pat in SUSPICIOUS_PHONE_PATTERNS.values():
+        ok &= ~p.str.contains(pat.pattern, regex=True).fillna(False).astype(bool)
+    return ok
+
+
+def standardize_name_series(s: pd.Series) -> pd.Series:
+    v = s.astype("string").str.strip()
+    low = v.str.lower()
+    bad = (v.isna() | (v == "") | low.isin(ANONYMOUS_PATTERNS) | (low.str.len() <= 2)).fillna(True)
+    return v.str.title().mask(bad.astype(bool), "Sobat Masjid")
+
+
+def get_campaign_series(ket: pd.Series) -> pd.Series:
+    third = ket.astype("string").str.split(" | ", n=3, regex=False).str[2].str.strip()
+    return third.where(third.str.len().between(1, MAX_CAMPAIGN_LENGTH))
+
+
+def pick_names(donor: pd.DataFrame) -> pd.Series:
+    d = donor.loc[donor["nama_clean"] != "Sobat Masjid", ["id_donor_final", "nama_clean"]]
+    cnt = d.groupby(["id_donor_final", "nama_clean"], sort=False).size().reset_index(name="cnt")
+    best = cnt.sort_values("cnt", ascending=False, kind="stable").drop_duplicates("id_donor_final")
+    return best.set_index("id_donor_final")["nama_clean"]
+
+
+def build_canonical_map(df_donor, df_transactions) -> dict:
+    valid = df_donor.loc[df_donor["phone_valid"], ["id_donor", "phone_clean"]]
+    trx_count = df_transactions.groupby("id_donor").size().rename("trx_count")
+    valid = valid.merge(trx_count, on="id_donor", how="left")
+    valid["trx_count"] = valid["trx_count"].fillna(0)
+    multi = valid.groupby("phone_clean")["id_donor"].transform("nunique") > 1
+    valid = valid[multi].sort_values(
+        ["phone_clean", "trx_count", "id_donor"], ascending=[True, False, True]
+    )
+    valid["canonical"] = valid.groupby("phone_clean")["id_donor"].transform("first")
+    return dict(zip(valid["id_donor"], valid["canonical"]))
+
+
+def jenis_donor_series(out: pd.DataFrame) -> pd.Series:
+    nominal, jenis, crm = out["max_donation"], out["id_jenis"], out["id_crm"]
+    conds = [
+        crm.isin(CORCOM_CRM_IDS),
+        (crm == "1022021001036") & (nominal >= 10_000_000),
+        (nominal >= 10_000_000) & (jenis == 1),
+        jenis == 1,
+        jenis.isin([2, 3]),
+        jenis == 5,
+    ]
+    choices = ["CorCom", "Retail - Platinum", "Retail - Platinum", "Retail", "CorCom", "Crowdfunding"]
+    return pd.Series(np.select(conds, choices, default="Retail"), index=out.index)
+
+
+def segment_series(out: pd.DataFrame) -> pd.Series:
+    r, f = out["recency_days"], out["frequency"]
+    f_s, m_s = out["frequency_score"], out["monetary_score"]
+    conds = [
+        f <= 2,
+        (m_s == 5) & (r <= 90),
+        (f_s == 4) & (m_s == 4) & (r <= 120),
+        r <= 180,
+        r >= 360,
+    ]
+    choices = ["New Donor", "Champion", "Loyal", "Active", "Passive"]
+    return pd.Series(np.select(conds, choices, default="Potential"), index=out.index)
+
+
+# def build_rfm_donor(df_donor, df_transactions, df_program, df_payment):
+#     donor = df_donor.copy()
+#     trx = df_transactions.copy()
+
+#     donor["phone_clean"] = donor["hp_donor"].apply(format_phone).astype("string")
+#     donor["phone_valid"] = donor["phone_clean"].apply(is_valid_phone)
+    
+#     donor["nama_clean"] = donor["nama_donor"].apply(standardize_name)
+
+#     canonical = build_canonical_map(donor, trx)
+#     donor["id_donor_final"] = donor["id_donor"].map(lambda x: canonical.get(x, x))
+#     trx["id_donor_final"] = trx["id_donor"].map(lambda x: canonical.get(x, x))
+#     trx['campaign'] = trx['keterangan'].apply(get_campaign)
+
+#     names = donor.groupby("id_donor_final")["nama_clean"].apply(pick_representative_name).rename("nama_final")
+#     donor = donor.merge(names, on="id_donor_final", how="left")
+#     donor = donor[donor['id_donor'] != "9999999999999"]
+#     trx = trx[trx['id_donor'] != "9999999999999"]
+
+#     # Donor dengan nomor invalid TETAP dimasukkan ke donor_master (tidak difilter lagi),
+#     # hanya dibedakan lewat kolom is_valid (1 = valid, 0 = tidak valid).
+#     donor_master = (
+#         donor
+#         .groupby("id_donor_final")
+#         .agg(
+#             nama=("nama_final", "first"),
+#             hp=("phone_clean", "first"),
+#             email=("email_donor", lambda x: next((e for e in x if pd.notna(e) and str(e).strip()), None)),
+#             id_jenis=("id_jenis", "first"),
+#             id_crm=("id_crm", "first"),
+#             is_valid=("phone_valid", "max"),
+#         )
+#         .reset_index().rename(columns={"id_donor_final": "id_donor"})
+#     )
+#     donor_master["is_valid"] = donor_master["is_valid"].astype(int)
+
+#     df_program = df_program.copy(); 
+#     df_payment = df_payment.copy()
+#     df_program["id_program"] = df_program["id_program"].astype(str)
+#     trx["id_program"] = trx["id_program"].astype(str)
+#     full = trx.merge(df_program, on="id_program", how="left").merge(df_payment, on="id_payment", how="left")
+#     full = full[full["id_donor_final"].isin(donor_master["id_donor"])]
+#     full["tanggal_donasi"] = pd.to_datetime(full["tanggal_donasi"])
+
+     
+#     fav_program = get_favorite(full, "id_donor_final", "nama_program", "program_favorit")
+#     fav_payment = get_favorite(full, "id_donor_final", "jenis_payment", "payment_favorit")
+#     fav_campaign = get_favorite(full, "id_donor_final", "campaign", "campaign_favorit")
+
+#     idx_last = full.groupby("id_donor_final")["tanggal_donasi"].idxmax()
+#     last = full.loc[idx_last, ["id_donor_final", "tanggal_donasi", "nominal", "nama_program", "jenis_payment", "campaign"]].rename(columns={
+#         "tanggal_donasi": "tanggal_donasi_terakhir", 
+#         "nominal": "last_donation",
+#         "nama_program": "program_terakhir", 
+#         "jenis_payment": "payment_terakhir",
+#         "campaign": "campaign_terakhir",
+#     })
+
+#     agg = full.groupby("id_donor_final").agg(
+#         first_donation_date=("tanggal_donasi", "min"), last_donation_date=("tanggal_donasi", "max"),
+#         frequency=("nominal", "count"), monetary=("nominal", "sum"), min_donation=("nominal", "min"),
+#         max_donation=("nominal", "max"), median_donation=("nominal", "median"), avg_donation=("nominal", "mean"),
+#     ).reset_index()
+#     agg["recency_days"] = (pd.Timestamp.now().normalize() - agg["last_donation_date"]).dt.days
+#     agg = calc_rfm_score(agg)
+
+#     out = donor_master.merge(agg, left_on="id_donor", right_on="id_donor_final", how="inner")
+#     out["jenis_donor"] = out.apply(
+#         lambda row: jenis_donor_label(row["id_jenis"], row["max_donation"], row["id_crm"]), axis=1
+#     )
+#     out = out[out['jenis_donor'] == "Retail"]
+#     out["rfm_segment"] = out.apply(segment_label, axis=1)
+#     for frame in (fav_program, fav_payment, fav_campaign, last):
+#         out = out.merge(frame, left_on="id_donor", right_on="id_donor_final", how="left", suffixes=("", "_drop"))
+#     out = out.drop(columns=[c for c in out.columns if c.startswith("id_donor_final")])
+    
+#     out["program_category"] = out["program_favorit"].apply(program_category)
+#     out = out.drop(columns=["id_jenis", "id_crm", "recency_score", "frequency_score", "monetary_score"])
+
+#     for c in ["first_donation_date", "last_donation_date", "tanggal_donasi_terakhir"]:
+#         out[c] = pd.to_datetime(out[c], errors="coerce").dt.date
+#     out[["median_donation", "avg_donation"]] = out[["median_donation", "avg_donation"]].round(2)
+#     return out
 
 def build_rfm_donor(df_donor, df_transactions, df_program, df_payment):
-    donor = df_donor.copy()
-    trx = df_transactions.copy()
+    donor = df_donor[df_donor["id_donor"] != DUMMY_ID].copy()
+    trx = df_transactions[df_transactions["id_donor"] != DUMMY_ID].copy()
 
-    donor["phone_clean"] = donor["hp_donor"].apply(format_phone).astype("string")
-    donor["phone_valid"] = donor["phone_clean"].apply(is_valid_phone)
-    
-    donor["nama_clean"] = donor["nama_donor"].apply(standardize_name)
+    donor["phone_clean"] = format_phone_series(donor["hp_donor"])
+    donor["phone_valid"] = is_valid_phone_series(donor["phone_clean"])
+    donor["nama_clean"] = standardize_name_series(donor["nama_donor"])
 
     canonical = build_canonical_map(donor, trx)
-    donor["id_donor_final"] = donor["id_donor"].map(lambda x: canonical.get(x, x))
-    trx["id_donor_final"] = trx["id_donor"].map(lambda x: canonical.get(x, x))
-    trx['campaign'] = trx['keterangan'].apply(get_campaign)
+    donor["id_donor_final"] = donor["id_donor"].map(canonical).fillna(donor["id_donor"])
+    trx["id_donor_final"] = trx["id_donor"].map(canonical).fillna(trx["id_donor"])
+    trx["campaign"] = get_campaign_series(trx["keterangan"])
+    trx = trx.drop(columns="keterangan")
 
-    names = donor.groupby("id_donor_final")["nama_clean"].apply(pick_representative_name).rename("nama_final")
-    donor = donor.merge(names, on="id_donor_final", how="left")
-    donor = donor[donor['id_donor'] != "9999999999999"]
-    trx = trx[trx['id_donor'] != "9999999999999"]
+    donor["nama_final"] = donor["id_donor_final"].map(pick_names(donor)).fillna("Sobat Masjid")
+    em = donor["email_donor"].astype("string").str.strip()
+    donor["email_clean"] = donor["email_donor"].where(em.notna() & em.ne(""))
 
-    # Donor dengan nomor invalid TETAP dimasukkan ke donor_master (tidak difilter lagi),
-    # hanya dibedakan lewat kolom is_valid (1 = valid, 0 = tidak valid).
     donor_master = (
-        donor
-        .groupby("id_donor_final")
+        donor.groupby("id_donor_final")
         .agg(
             nama=("nama_final", "first"),
             hp=("phone_clean", "first"),
-            email=("email_donor", lambda x: next((e for e in x if pd.notna(e) and str(e).strip()), None)),
+            email=("email_clean", "first"),
             id_jenis=("id_jenis", "first"),
             id_crm=("id_crm", "first"),
             is_valid=("phone_valid", "max"),
@@ -275,47 +447,44 @@ def build_rfm_donor(df_donor, df_transactions, df_program, df_payment):
     )
     donor_master["is_valid"] = donor_master["is_valid"].astype(int)
 
-    df_program = df_program.copy(); 
-    df_payment = df_payment.copy()
+    df_program = df_program.copy(); df_payment = df_payment.copy()
     df_program["id_program"] = df_program["id_program"].astype(str)
     trx["id_program"] = trx["id_program"].astype(str)
     full = trx.merge(df_program, on="id_program", how="left").merge(df_payment, on="id_payment", how="left")
+    del trx
     full = full[full["id_donor_final"].isin(donor_master["id_donor"])]
     full["tanggal_donasi"] = pd.to_datetime(full["tanggal_donasi"])
-
-     
-    fav_program = get_favorite(full, "id_donor_final", "nama_program", "program_favorit")
-    fav_payment = get_favorite(full, "id_donor_final", "jenis_payment", "payment_favorit")
-    fav_campaign = get_favorite(full, "id_donor_final", "campaign", "campaign_favorit")
-
-    idx_last = full.groupby("id_donor_final")["tanggal_donasi"].idxmax()
-    last = full.loc[idx_last, ["id_donor_final", "tanggal_donasi", "nominal", "nama_program", "jenis_payment", "campaign"]].rename(columns={
-        "tanggal_donasi": "tanggal_donasi_terakhir", 
-        "nominal": "last_donation",
-        "nama_program": "program_terakhir", 
-        "jenis_payment": "payment_terakhir",
-        "campaign": "campaign_terakhir",
-    })
 
     agg = full.groupby("id_donor_final").agg(
         first_donation_date=("tanggal_donasi", "min"), last_donation_date=("tanggal_donasi", "max"),
         frequency=("nominal", "count"), monetary=("nominal", "sum"), min_donation=("nominal", "min"),
         max_donation=("nominal", "max"), median_donation=("nominal", "median"), avg_donation=("nominal", "mean"),
     ).reset_index()
-    agg["recency_days"] = (pd.Timestamp.now().normalize() - agg["last_donation_date"]).dt.days
+    agg["recency_days"] = (pd.Timestamp(now_wib()).normalize() - agg["last_donation_date"]).dt.days
     agg = calc_rfm_score(agg)
 
     out = donor_master.merge(agg, left_on="id_donor", right_on="id_donor_final", how="inner")
-    out["jenis_donor"] = out.apply(
-        lambda row: jenis_donor_label(row["id_jenis"], row["max_donation"], row["id_crm"]), axis=1
-    )
-    out = out[out['jenis_donor'] == "Retail"]
-    out["rfm_segment"] = out.apply(segment_label, axis=1)
+    out["jenis_donor"] = jenis_donor_series(out)
+    out = out[out["jenis_donor"] == "Retail"].copy()
+    out["rfm_segment"] = segment_series(out)
+
+    # favorit & terakhir hanya untuk donor Retail
+    full = full[full["id_donor_final"].isin(out["id_donor"])]
+    fav_program = get_favorite(full, "id_donor_final", "nama_program", "program_favorit")
+    fav_payment = get_favorite(full, "id_donor_final", "jenis_payment", "payment_favorit")
+    fav_campaign = get_favorite(full, "id_donor_final", "campaign", "campaign_favorit")
+    idx_last = full.groupby("id_donor_final")["tanggal_donasi"].idxmax()
+    last = full.loc[idx_last, ["id_donor_final", "tanggal_donasi", "nominal", "nama_program", "jenis_payment", "campaign"]].rename(columns={
+        "tanggal_donasi": "tanggal_donasi_terakhir", "nominal": "last_donation",
+        "nama_program": "program_terakhir", "jenis_payment": "payment_terakhir",
+        "campaign": "campaign_terakhir",
+    })
+
     for frame in (fav_program, fav_payment, fav_campaign, last):
         out = out.merge(frame, left_on="id_donor", right_on="id_donor_final", how="left", suffixes=("", "_drop"))
     out = out.drop(columns=[c for c in out.columns if c.startswith("id_donor_final")])
-    
-    out["program_category"] = out["program_favorit"].apply(program_category)
+
+    out["program_category"] = out["program_favorit"].map(_CATEGORY_LOOKUP).fillna("Lainnya")
     out = out.drop(columns=["id_jenis", "id_crm", "recency_score", "frequency_score", "monetary_score"])
 
     for c in ["first_donation_date", "last_donation_date", "tanggal_donasi_terakhir"]:

@@ -1,29 +1,10 @@
 import type { SyncLog } from "@/app/(protected)/sync-log/page";
+import { formatDateTime, formatNumber } from "@/lib/format";
 
 type SyncLogTableProps = {
   logs: SyncLog[];
 };
 
-function formatDate(value: string | null) {
-  if (!value) return "-";
-
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(new Date(value));
-}
-
-function formatNumber(value: number | null) {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  return new Intl.NumberFormat("id-ID").format(value);
-}
 
 function getStatusClass(status: string) {
   switch (status.toLowerCase()) {
@@ -54,8 +35,8 @@ export default function SyncLogTable({logs, }: SyncLogTableProps) {
               <th>Mulai</th>
               <th>Selesai</th>
               <th>Status</th>
-              <th>Jumlah Donor</th>
-              {/* <th>Pesan</th> */}
+              <th>Tipe Sinkron</th>
+              <th>Jumlah Data</th>
             </tr>
           </thead>
  
@@ -71,31 +52,17 @@ export default function SyncLogTable({logs, }: SyncLogTableProps) {
               </tr>
             ) : (
               logs.map((log) => (
-                <tr 
-                  key={log.id}
-                  className="sync-log-row">
+                <tr key={log.id} className="sync-log-row">
 
-                  <td>{formatDate(log.started_at)}</td>
-
-                  <td>{formatDate(log.finished_at)}</td>
-
+                  <td>{formatDateTime(log.started_at)}</td>
+                  <td>{formatDateTime(log.finished_at)}</td>
                   <td>
-                    <span
-                      className={getStatusClass(
-                        log.status
-                      )}
-                    >
+                    <span className={getStatusClass( log.status )} >
                       {log.status}
                     </span>
                   </td>
-
-                  <td>
-                    {formatNumber(log.donor_count)}
-                  </td>
-
-                  {/* <td className="sync-log-message">
-                    {log.message || "-"}
-                  </td> */}
+                  <td>{log.type || "-"}</td>
+                  <td>{formatNumber(log.donor_count)}</td>
                 </tr>
               ))
             )}

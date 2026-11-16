@@ -6,6 +6,7 @@ from sqlalchemy import bindparam, text
 
 from app.db.session import DashboardSessionLocal, dashboard_engine, source_engine
 from app.services.sync.sync_common import (
+    SYNC_BLAST,
     mark_failed,
     mark_success,
     now_wib,
@@ -80,14 +81,14 @@ def _get_transactions_for_donors(donor_ids: list[str]) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True) if frames else EMPTY_TRX.copy()
 
 
-@with_sync_lock("blast_conversion")
+@with_sync_lock(SYNC_BLAST)
 def run_blast_conversion_sync() -> dict:
     """
     Sync TERPISAH dari run_rfm_sync(): hanya menarik transaksi donor yang
     pernah diblast, jadi tetap ringan. Dicatat di SyncRun (sync_type="blast").
     """
     db = DashboardSessionLocal()
-    run = start_run(db, "blast")
+    run = start_run(db, SYNC_BLAST)
     try:
         blasted = _get_blasted_donor_groups()
 
