@@ -33,12 +33,12 @@ export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUs
       defaultVisible: true,
       render: (u) => (u.created_at ? formatDateTime(u.created_at) : "-"),
     },
-    {
-      key: "last_login_at",
-      label: "Last Login",
-      defaultVisible: true,
-      render: (u) => (u.last_login_at ? formatDateTime(u.last_login_at) : "-"),
-    },
+    // {
+    //   key: "last_login_at",
+    //   label: "Last Login",
+    //   defaultVisible: true,
+    //   render: (u) => (u.last_login_at ? formatDateTime(u.last_login_at) : "-"),
+    // },
     {
       key: "actions",
       label: "Aksi",
