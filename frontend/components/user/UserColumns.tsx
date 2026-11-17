@@ -44,7 +44,7 @@ export function UserColumns({onEdit, onDelete}: Handlers): DataTableColumn<CRMUs
       label: "Aksi",
       locked: true,
       defaultVisible: true,
-      align: "center",
+      align: "left",
       render: (u) => (
         <div className="row-actions">
           <button type="button" className="icon-button-edit" aria-label={`Edit ${u.email}`} title="Edit" onClick={() => onEdit(u)}>

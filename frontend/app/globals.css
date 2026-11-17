@@ -1859,7 +1859,7 @@ select:focus {
 
 .row-actions { 
   display: inline-flex;
-  gap: 3px;
+  /* gap: 3px; */
 }
 
 .icon-button-edit,
