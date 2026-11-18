@@ -794,12 +794,12 @@ select:focus {
     repeat(3, minmax(170px, 1fr))
     auto;
   align-items: start;
-  gap: 15px;
+  gap: 24px 8px;
   width: 100%;
 }
 
 .donor-filter-bar {
-  margin-bottom: 18px;
+  margin-bottom: 25px;
 }
 
 .donor-filter-column {
@@ -888,9 +888,64 @@ select:focus {
   margin-top: 1.5px;
   margin-bottom: 2px;
   left: 2px;
-  color: #9ca3af;
+  /* color: #9ca3af; */
+  color: var(--danger);
   font-size: 11px;
   white-space: nowrap;
+}
+
+.multi-select-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+}
+
+.multi-select-search .multi-select-search-icon {
+  position: absolute;
+  left: 18px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.multi-select-search input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 0px 30px 0px 32px;
+  font-size: 12px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+  outline: none;
+  background: transparent;
+  color: inherit;
+}
+
+.multi-select-search .multi-select-search-clear {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.multi-select-search .multi-select-search-clear:hover {
+  opacity: 1;
+}
+
+.multi-select-empty {
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.6;
 }
 
 .multi-select {
@@ -950,9 +1005,9 @@ select:focus {
   top: calc(100% + 7px);
   left: 0;
   right: auto;
-  width: auto;
-  min-width: 220px;
-  max-width: min(320px, calc(100vw - 24px));
+  width: 100%;
+  /* min-width: 200px;
+  max-width: min(320px, calc(100vw - 24px)); */
   padding: 6px;
   border: 1px solid var(--ivory-soft);
   border-radius: 12px;
@@ -1011,7 +1066,7 @@ select:focus {
   padding: 7px 8px;
   border-radius: 7px;
   color: #374151;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   user-select: none;
   transition: background-color 0.15s ease;
@@ -1113,7 +1168,7 @@ select:focus {
   text-align: center;
 }
 
-.table-scroll {
+/* .table-scroll {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -1122,13 +1177,13 @@ select:focus {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
-}
+} */
 
-.table-scroll table {
+/* .table-scroll table {
   width: 100%;
   min-width: max-content;
   border-collapse: collapse;
-}
+} */
 
 .donor-table {
   width: 100%;

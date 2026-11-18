@@ -27,6 +27,8 @@ export type MultiSelectFilterProps = {
   paramKey: string;
   options: string[];
   selected: string[];
+  searchable?: boolean;
+  searchPlaceholder?: string;
   align?: "left" | "right";
 
   onChange: (
@@ -46,6 +48,8 @@ export interface SelectFilterProps {
   allLabel?: string;
   showAllOption?: boolean; // default true, set false untuk form
   placeholder?: string;    // teks saat belum ada pilihan
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 export type Summary = {

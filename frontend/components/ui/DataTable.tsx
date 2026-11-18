@@ -46,7 +46,7 @@ export default function DataTable<T extends object>({
       {toolbar}
 
       <div className="table-card">
-        {header}
+        {header} 
         <div className="table-scroll">
           <table className="data-table">
             <thead>
