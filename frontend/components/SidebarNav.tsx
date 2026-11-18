@@ -174,7 +174,7 @@ export function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
           icon={ShieldCheck}
           items={adminNavItems}
           pathname={pathname}
-          className="nav-admin"
+          // className="nav-admin"
         />
       )}
     </nav>

@@ -170,7 +170,6 @@ def format_phone_series(s: pd.Series) -> pd.Series:
 def is_valid_phone_series(p: pd.Series) -> pd.Series:
     """Format 628 + 7-11 digit dan tidak cocok pola nomor mencurigakan."""
     ok = p.str.match(r"^628\d{7,11}$").fillna(False).astype(bool)
-    # Pola tidak digabung jadi satu regex: backreference \1 akan bergeser.
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="This pattern is interpreted as a regular expression")
         for pat in SUSPICIOUS_PHONE_PATTERNS.values():

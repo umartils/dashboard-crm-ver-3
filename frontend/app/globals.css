@@ -337,9 +337,9 @@ select:focus {
   padding: 11px 13px;
 
   border-radius: 10px;
-
+ 
   color: #5f5f64;
-
+ 
   font-size: 14px;
   font-weight: 500;
 
@@ -427,6 +427,27 @@ select:focus {
 .nav .nav-subitem:hover {
   background: var(--brand-50);
   color: var(--charcoal);
+}
+
+/* ---- Nav group (parent) ---- */
+.nav-parent > a {
+  /* flex & gap sudah diwarisi dari .nav a */
+  width: 100%;
+}
+
+.nav-parent > a > span {
+  flex: 1;          /* teks mengisi ruang sisa, chevron terdorong ke kanan */
+  min-width: 0;     /* cegah teks panjang merusak layout */
+}
+
+.nav-group-chevron {
+  flex-shrink: 0;   /* ukuran icon tidak mengecil */
+  margin-left: auto; /* jaga-jaga jika span tidak flex: 1 */
+  transition: transform 0.25s ease;
+}
+
+.nav-parent.is-open > a .nav-group-chevron {
+  transform: rotate(180deg);
 }
 
 .sidebar-footer {

@@ -124,7 +124,7 @@ export default function RetentionCharts({ rows, average }: Props) {
                 tick={AXIS_TICK}
                 height={22}
                 interval="preserveStartEnd"
-              />
+              /> 
               <YAxis
                 tickFormatter={(v) => formatInt(v)}
                 tick={AXIS_TICK}
