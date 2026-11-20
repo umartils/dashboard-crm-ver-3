@@ -8,6 +8,7 @@ class HealthResponse(BaseModel):
 
 class UserCreateRequest(BaseModel):
     email: EmailStr
+    role: str
 
 
 class UserResponse(BaseModel):

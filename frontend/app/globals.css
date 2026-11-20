@@ -794,7 +794,7 @@ select:focus {
     repeat(3, minmax(170px, 1fr))
     auto;
   align-items: start;
-  gap: 24px 8px;
+  gap: 15px 8px;
   width: 100%;
 }
 
@@ -840,8 +840,8 @@ select:focus {
 .btn-sync,
 .btn-download {
   box-sizing: border-box;
-  height: 46px;
-  min-height: 46px;
+  height: 42px;
+  min-height: 42px;
   border-radius: 10px;
 }
 
@@ -875,7 +875,7 @@ select:focus {
   outline: none;
   background: transparent;
   color: #111827;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .filter-search input::placeholder {
@@ -1352,7 +1352,7 @@ select:focus {
 
 .table-footer-info-text {
   color: #6b7280;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .page-size-selector {
@@ -1362,18 +1362,18 @@ select:focus {
 }
 
 .page-size-selector span {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .page-size-selector select {
-  min-width: 72px;
-  height: 38px;
+  min-width: 50px;
+  height: 30px;
   padding: 0 30px 0 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #ffffff;
   color: #0c1f19;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   outline: none;
@@ -1396,8 +1396,8 @@ select:focus {
 }
 
 .pagination button {
-  min-width: 38px;
-  height: 38px;
+  min-width: 34px;
+  height: 34px;
   padding: 0;
   border: 1px solid var(--ivory-soft);
   border-radius: 8px;
@@ -2538,7 +2538,7 @@ select:focus {
   background: #ffffff;
   color: #374151;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -2901,10 +2901,16 @@ select:focus {
 @media (max-width: 1200px) {
   .donor-filter-bar {
     grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(170px, 1fr));
+    gap: 8px;
   }
 
   .filter-actions {
     grid-column: span 2;
+  }
+
+  .date-filter-panel,
+  .date-filter-panel.align-right {
+    width: 100%;
   }
 }
 
@@ -3333,10 +3339,30 @@ select:focus {
 @media (max-width: 900px) {
   .donor-filter-bar {
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
   .donor-profile-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .date-filter-panel,
+  .date-filter-panel.align-right {
+    width: 100%;
+  }
+
+  .pagination button {
+    min-width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--ivory-soft);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #565e6d;
+    box-shadow: none;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
   }
 }
 
@@ -3354,6 +3380,12 @@ select:focus {
 @media (max-width: 768px) {
   .donor-filter-bar {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .date-filter-panel,
+  .date-filter-panel.align-right {
+    width: 100%;
   }
 
   .filter-actions {
@@ -3405,6 +3437,12 @@ select:focus {
 @media (max-width: 600px) {
   .donor-filter-bar {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .date-filter-panel,
+  .date-filter-panel.align-right {
+    width: 100%;
   }
 
   .donor-profile-grid {
