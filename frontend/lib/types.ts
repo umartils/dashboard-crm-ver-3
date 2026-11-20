@@ -5,6 +5,7 @@ export type Filters = {
   jenis_donor: string[];
   program_categories: string[];
   is_valid: string[];
+  blasted: string[];
 };
 
 export type Current = {
@@ -15,6 +16,7 @@ export type Current = {
   jenis_donor: string[];
   program_categories: string[];
   is_valid: string[];
+  blasted: string[];
   last_donation_start: string;
   last_donation_end: string;
   prospect_exclude_start: string;
@@ -102,6 +104,7 @@ export type DonorRFM = {
   jenis_donor?: string;
   program_category?: string;
   tgl_prospek?: string;
+  blasted?: string;
   is_valid?: string;
 };
 

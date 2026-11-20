@@ -118,6 +118,17 @@ export default function DonorFilters({
         labelMap={{ "1": "Valid", "0": "Tidak Valid" }}
       />
 
+      <MultiSelectFilter
+        label="status blast"
+        paramKey="blasted"
+        options={filters.blasted}
+        selected={
+          current.blasted ?? []
+        }
+        onChange={updateMultiParam}
+        labelMap={{ "1": "Sudah", "0": "Belum" }}
+      />
+
       <div className="filter-actions">
         {role === "admin" && (
           <SyncButton endpoint="/api/backend/admin/sync" />

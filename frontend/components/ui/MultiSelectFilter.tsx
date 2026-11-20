@@ -64,7 +64,9 @@ export default function MultiSelectFilter({
   }
 
   function getDisplayLabel() {
-    if (selected.length === 0) return `Semua ${label}`;
+    const capitalize = (str: string) =>
+      str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+    if (selected.length === 0) return capitalize(label);
     if (selected.length === 1) return getLabel(selected[0]);
     return `${selected.length} ${label} dipilih`;
   }

@@ -62,6 +62,7 @@ def donors(
     jenis_donor: list[str] = Query(default=[]),
     program_categories: list[str] = Query(default=[]),
     is_valid: list[str] = Query(default=[]),
+    blasted: list[str] = Query(default=[]),
     search: str | None = None,
     last_donation_start: date | None = Query(default=None),
     last_donation_end: date | None = Query(default=None),
@@ -88,6 +89,7 @@ def donors(
         prospect_exclude_start=prospect_exclude_start,
         prospect_exclude_end=prospect_exclude_end,
         is_valid=is_valid,
+        blasted=blasted,
     )
  
     # Hitung jumlah data setelah filter
@@ -122,7 +124,7 @@ def donors(
         text(
             f"""
             SELECT
-                id_donor, nama, hp, email, rfm_segment, recency_days, frequency, monetary, tgl_prospek,
+                id_donor, nama, hp, email, rfm_segment, recency_days, frequency, monetary, tgl_prospek, blasted,
                 program_favorit, payment_favorit, last_donation_date, jenis_donor, program_category, is_valid, last_donation
             FROM donor_summary
             WHERE {clause}
@@ -325,6 +327,9 @@ def filters(db: Session = Depends(get_dashboard_db)):
         "program_categories": values("program_category"),
         "is_valid": [str(r[0]) for r in db.execute(
             text("SELECT DISTINCT is_valid v FROM donor_summary WHERE is_valid IS NOT NULL ORDER BY v")
+        ).all()],
+        "blasted": [str(r[0]) for r in db.execute(
+            text("SELECT DISTINCT blasted v FROM donor_summary WHERE blasted IS NOT NULL ORDER BY v")
         ).all()],
     }    
 

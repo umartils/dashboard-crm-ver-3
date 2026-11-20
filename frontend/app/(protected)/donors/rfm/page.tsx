@@ -13,6 +13,7 @@ type Params = {
   jenis_donor?: string | string[];
   program_categories?: string | string[];
   is_valid?: string | string[];
+  blasted?: string | string[];
 
   last_donation_start?: string;
   last_donation_end?: string;
@@ -85,6 +86,7 @@ export default async function Donors({ searchParams }: { searchParams: Promise<P
           jenis_donor: toArray(p.jenis_donor),
           program_categories: toArray(p.program_categories),
           is_valid: toArray(p.is_valid),
+          blasted: toArray(p.blasted),
           last_donation_start: p.last_donation_start || "",
           last_donation_end: p.last_donation_end || "",
           prospect_exclude_start: p.prospect_exclude_start || "",

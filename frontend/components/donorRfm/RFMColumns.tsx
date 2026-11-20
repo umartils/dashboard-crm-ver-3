@@ -44,7 +44,6 @@ export function RFMColumns({onEdit, canEdit}: Handlers): DataTableColumn<DonorRF
       key: "last_donation_date", label: "Terakhir Donasi", sortable: true, align: "center",
       defaultVisible: true, render: (r) => formatLongDate(r.last_donation_date) 
     },
-    // { key: "jenis_donor", label: "Jenis Donor", locked: true, defaultVisible: true },
     {
       key: "is_valid", label: "Jenis Valid", locked: true, defaultVisible: true,
       render: (r) => {
@@ -59,7 +58,19 @@ export function RFMColumns({onEdit, canEdit}: Handlers): DataTableColumn<DonorRF
     { key: "program_category", label: "Kategori Program" },
     { 
       key: "tgl_prospek", label: "Tanggal Prospek", sortable: true, align: "center",
-      render: (r) => formatLongDate(r.tgl_prospek) },
+      render: (r) => formatLongDate(r.tgl_prospek) 
+    },
+    {
+      key: "blasted", label: "Status Blast",
+      render: (r) => {
+        const is_blasted = String(r.blasted) === "1";
+        return (
+            <span>
+              {is_blasted? "Sudah" : "Belum"}
+            </span>
+        )
+      }
+    },
     {
       key: "actions",
       label: "Aksi",

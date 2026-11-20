@@ -62,6 +62,7 @@ def build_donor_filters(
     jenis_donor: list[str],
     program_categories: list[str],
     is_valid: list[str],
+    blasted: list[str],
     search: str | None,
     last_donation_start: date | None = None,
     last_donation_end: date | None = None,
@@ -79,6 +80,7 @@ def build_donor_filters(
         "payment": ("payment_favorit", payment),
         "jenis_donor": ("jenis_donor", jenis_donor),
         "is_valid": ("is_valid", is_valid),
+        "blasted": ("blasted", blasted),
         "program_categories": ("program_category", program_categories),
     }
 
