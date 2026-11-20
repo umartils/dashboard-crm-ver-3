@@ -66,7 +66,7 @@ export function RFMColumns({onEdit, canEdit}: Handlers): DataTableColumn<DonorRF
         const is_blasted = String(r.blasted) === "1";
         return (
             <span>
-              {is_blasted? "Sudah" : "Belum"}
+              {is_blasted? "Sudah blast" : "Belum blast"}
             </span>
         )
       }
