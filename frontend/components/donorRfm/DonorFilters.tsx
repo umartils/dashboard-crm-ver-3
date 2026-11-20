@@ -126,7 +126,7 @@ export default function DonorFilters({
           current.blasted ?? []
         }
         onChange={updateMultiParam}
-        labelMap={{ "1": "Sudah", "0": "Belum" }}
+        labelMap={{ "1": "Sudah blast", "0": "Belum blast" }}
       />
 
       <div className="filter-actions">
